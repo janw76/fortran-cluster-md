@@ -1,0 +1,417 @@
+*===============================================================================
+* Modular program for simulation of small Lennard-Jones atomic clusters
+*-------------------------------------------------------------------------------
+* File: README
+*===============================================================================
+* Legende:
+* 
+* <filesorte>	"<funktions/subroutinename>"	Erlaeuterungen 
+* 
+* oder
+*
+* <Filename>	"<funktions/subroutinename>"	(<noetige Vorraussetzung>)
+* 	Erlaeuterungen
+*-------------------------------------------------------------------------------
+
+
+Makefile	"make [key]"
+	Makefile, erleichtert das Kompilieren der einzelnen
+	Bausatzkombinationen durch vorgegebene keys.
+
+sample.3d
+	Konfigurationsdaten fuer eine Simulation, wird von readdata()
+	eingelesen.
+
+
+*-------------------------------------------------------------------------------
+* include-files
+*-------------------------------------------------------------------------------
+
+atomc.inc
+	Atom-Koordinaten und direkte Ableitungen (Geschwindigkeiten, 
+	Beschleunigungen, etc.)
+
+atomp.inc
+	Atomare Parameter (Radius, Masse, Anzahl der Teilchen, 
+	Cut-off Radius, etc.)
+
+boxpp.inc
+	Box Parameter (Kantenlaenge, Potentiale der Waende, etc)
+
+const.inc
+	Konstanten (Boltzmann, Avogadro, pi, Plank, intere Umrechungsfaktoren)
+
+cvtpp.inc
+	Cluster Statistiken (Groesse, Clusternummer, Clusterenergien, etc)
+
+dmmpp.inc
+	Optimierungsstatistiken (Verschiebungsgroessen, Durchschnitt, Maximum, 
+	etc.)
+
+energ.inc
+	Energie (Kinet. und pot.Energie des Systems, der Waende, etc)
+
+filep.inc
+	File Parameter (rel. und abs. Filenamen, Pfade, Ausgabeintervalle, etc)
+
+timep.inc
+	Zeit Parameter (Simulationsschritt, Bildschirmausgaben, etc)
+
+connp.inc
+	Interatomare Beziehungen (prealpha-version)
+
+
+*-------------------------------------------------------------------------------
+* main		"cluster"	Hauptprogramm
+*-------------------------------------------------------------------------------
+
+main.f		(init, int, for-a, for-w, read, wrt, hilfsroutinen)
+	main-program for the simulation.
+
+
+*-------------------------------------------------------------------------------
+* Init-files	"initconf()"	Startkonfigurationen
+*-------------------------------------------------------------------------------
+
+init-2atoms.f	(kps)
+	Initialisierung eines Systems mit 2 Atomen
+
+init-cube1.f	(kps)
+	Initialisierung eines Systems mit einer kubischen Startformation
+
+init-ball1.f	(kps)
+	Initialisierung eines Systems mit einer kugelfoermigen
+	Startformation
+
+
+*-------------------------------------------------------------------------------
+* int-files	"integrator(step)"	integrators
+*-------------------------------------------------------------------------------
+
+int-euler1.f 		(for-a, for-w)
+	Simpler Euler-Algorithmus
+
+int-euler2.f		(for-a, for-w)
+	Euler-Algorithmus unter Beruecksichtigung der
+	Beschleunigungkomponente 
+
+int-gear3.f		(for-a, for-w)
+	Gear-Algorithmus 3. Ordnung
+
+int-gear4.f		(for-a, for-w)
+	Gear-Algorithmus 4. Ordnung
+
+int-gear5.f		(for-a, for-w)
+	Gear-Algorithmus 5. Ordnung
+
+int-verlet.f		(for-a, for-w)
+	Einfacher Verlet-Algorithmus 
+
+int-verlet-dmm.f	(for-a, for-w, neighbor)
+	Verlet-Algorithmus mit Berechnung von Verschiebungen der Teilchen
+
+int-verlet-mav.f	(for-a, for-w, neighbor)
+	Verlet-Algorithmus unter Beruecksichtigung der durchschnittlichen 
+	Verschiebung der Teilchen.
+	
+
+*-------------------------------------------------------------------------------
+* for-a-files	"AccAtom()"	Kraefteberechnung Atom-Atom
+*-------------------------------------------------------------------------------
+
+for-a-dummy.f
+	Dummy, tut nix
+
+for-a-lj1.f
+	Einfache Lennard-Jones Beziehung
+
+for-a-lj2.f
+	Optimierungen von lj1
+
+for-a-lj3.f
+	Optimierungen von lj2
+
+for-a-lj4.f
+	Optimierungen von lj3
+
+for-a-lj-n.f		(neighbor)
+	Lennard-Jones Beziehung Mit Verwendung eines Cutoff-Radius
+
+for-a-lj-n-pbc.f	(neighbor)
+	Lennard-Jones Beziehung Mit Verwendung eines Cutoff-Radius
+	und periodischen Randbedingungen
+
+
+*-------------------------------------------------------------------------------
+* for-w-files	"AccWall()"	Kraefteberechnung Atom-Walls
+*-------------------------------------------------------------------------------
+
+for-w-dummy.f
+	Dummy, tut nix
+
+for-w-i9.f
+	r^-9 walls
+
+for-w-i12.f
+	r^-12 walls
+
+for-w-iX.f
+	r^-X walls, X wird aus dem .3d eingelesen
+
+
+*-------------------------------------------------------------------------------
+* read-files	Einleseroutinen
+*-------------------------------------------------------------------------------
+
+read-3d.f 	"readdata()"			(.3d-file)
+	Einlesen der Konfigurationsfiles *.3d
+
+read-rst.f	"readRST(step,fnum)"		(.rst-file)
+	Einlesen der Restart-Files
+
+read-xyz.f	"readXYZ(step,fnum)"		(.xyz-file)
+	Einlesen von Koordinaten-Block-Files
+
+
+*-------------------------------------------------------------------------------
+* wrt-files	Ausgaberoutinen
+*-------------------------------------------------------------------------------
+
+wrt-acc.f	"wrtACC(step,fnum)"
+	Ausgabe der Beschleunigungen
+
+wrt-ave.f	"wrtAVE(step,fnum)"
+	Ausgabe von Durchschnittswerten
+
+wrt-csi.f	"wrtCSI(step,fnum)"
+	Ausgabe von Clusterstatistics
+
+wrt-rst.f	"wrtRST(step,fnum)"
+	Ausgabe des Restartfiles	
+
+wrt-vel.f	"wrtVEL(step,fnum)"
+	Ausgabe der Geschwindigkeiten
+
+wrt-xyz.f	"wrtXYZ(step,fnum)"
+	Ausgabe der Teilchen-Koordinaten
+
+wrt-xyz1.f	"wrtXYZ(step,fnum)"	(stoddard)
+	Ausgabe der Teilchen-Koordinaten
+	Abschaltbare Monomere (als H), Dimere (N), Trimere (O)
+	Tetramere (C), Polymere (S)
+
+wrt-xyz2.f	"wrtXYZ(step,fnum)"	(stoddard)
+	Ausgabe der Teilchen-Koordinaten
+	gibt nur den groessten Cluster aus
+
+wrt-xyz3.f	"wrtXYZ(step,fnum)"	(stoddard)
+	Ausgabe der Teilchen-Koordinaten
+	Alle Polymere groesser einer Richtzahl (noch fest eincompiliert)
+
+wrt-xyz-m.f	"wrtXYZ(step,fnum)"
+	Ausgabe der Koordinaten fuer gemischte Systeme
+
+
+*-------------------------------------------------------------------------------
+* neighbor-files	"neighbor(step)"	Nachbarschaftslisten
+*-------------------------------------------------------------------------------
+
+neighbor-dummy.f	
+	Macht nix
+
+neighbor.f
+	Einfachste Art der Nachbarschaftslisten
+
+neighbor-pbc.f
+	Nachbarschaftsliste mit periodischen Randbedingungen
+
+neighbor-pbc-mav.f
+	Nachbarschaftsliste mit periodischen Randbedingungen unter 
+	Beruecksichtigung der durchschnittlichen Verschiebung der 
+	Teilchen
+
+
+*-------------------------------------------------------------------------------
+* stoddard-files	"stoddard()"	Stoddard-Routinen
+*-------------------------------------------------------------------------------
+
+stoddard.f
+	Clustersuche in einem Datenblock
+	
+stoddard-pbc.f
+	Clustersuche in einem Datenblock mit periodischen Randbedingungen
+
+
+*-------------------------------------------------------------------------------
+* Hilfsroutinen
+*-------------------------------------------------------------------------------
+
+kps.f		"kpsInit(flag), kpsSetMax(max), kpsRND(), 
+		 kpsINT(), kpsINTf(), kpsMAX(maximum), kpsMAX2()"
+	Zufallszahlengenerator
+
+scalev.f	"thermostat()"
+	Routine zum Setzen der Geschwindigkeiten v der Teilchen
+
+resize.f	"resize(step)"
+	Routine zum Resizen der Boxgroesse
+
+stopdead.f	"stopdead()"
+	Setzt den Gesamtbewegungsvector der Systems auf 0
+
+
+********************************************************************************
+********************************************************************************
+*===============================================================================
+* HILFSPROGRAMME	folder: ~/helpers/*
+*-------------------------------------------------------------------------------
+
+
+bars  <3d-file>  <startsize>  <endsize>  <outfile>
+
+	"make bars"
+	
+	Erzeugt aus einem .csi-file einer Simulation ein .nff-file, in dem ein 
+	zeitabhaengiges Balkendiagramm der Clustergroessenverteilung gespeichert
+	wird.
+
+
+colgas  <3d-file>  <outfile>  <verlaufsfile>  <skipfactor>
+
+	"make colgas"	Box-Version
+	"make colgasp"	PBC-Version
+	
+	Erzeugt aus dem xyz-file einer Simulation ein File, in dem im 1.Schritt
+	der Cluster gruen und der Rest gelb ist. Dann kann man den Austausch 
+	beobachten, die Anzahl der Austausche wird im Verlaufsfile 
+	gezaehlt.
+
+
+density  <3d-file>  <outfile>  <discard>  <rstep (in \AA)>
+
+	"make density"	Box-Version
+	"make densitp"	PBC-Version
+	
+	Benutzt das xyz-file einer Simulation, um das Dichteprofil des 
+	groessten Clusters zu erstellen. Die ersten <discard> Konfigurationen 
+	werden ignoriert.
+	Ausgabe: j, v, m(r), m(r)/V(dr), sum(m(r)), sum(m(r)/V))
+
+
+makelog	??????????????????????????????????????
+
+
+marker  <3d-file>  <outfile>  <symbol1>  <symbol2>
+
+	"make marker"
+	
+	Markiert Atom #1 mit Symbol2 und den Rest mit Symbol1
+
+
+mesher  <3d-file>  <outfile>
+
+	"make mesher"
+	
+	Benutzt das csi-file einer Simulation, um einen clustergroessen gegen 
+	Zeit-plot zu erstellen. (BETAVERSION)
+	
+	
+mvclu	<3d-file>  <outfile>  <centerflags>
+
+	"make mvclu"
+
+	Liesst aus einem in 3d angegebenen restart-file den groessten
+	Cluster aus und positioniert ihn dann in der Box, wobei als 
+	<centerflags> angeben, welche Koordinate centriert und welche auf 0 
+	gesetzt werden soll.
+	Beispiele: 	111 setzt Cluster ins Boxzentrum
+			000 in den Ursprung
+			100 auf x-achse
+			110 in die xy-flaeche
+
+
+press  <3d-file>  <outfile>  <ave-step>
+
+	"make press"
+	
+	Liest das .ave-file und bildet den Durchschnitt ueber ave-step 
+	Druckwerte gegen Zeit.
+	
+
+pressw  <3d-file>  <outfile>	OBSOLETE
+	
+	"make pressw"
+	
+	Benutzt das xyz-file einer Simulation, um den Druck im System aus der 
+	Kraft auf die Waende zu berechnen. NICHT FUER PBC !!!
+	
+
+rdf-org	 alte Version von rdf.
+
+rdf  <3d-file>  <outfile>  <streu-file>  <discard>  <vstep (0.02 guter Wert)>
+
+	"make rdf" 	NUR fuer PBC
+	
+	Erzeugt aus dem xyz-file einer Simulation die Paarverteilungsfkt. und 
+	die Streukurve fuer das System. Die ersten <discard> Konfigurationen 
+	werden ignoriert. 
+	outfile: r, gn(r), gid(r), gn(r)/gid(r)
+	streu  : i, q(i), log(q(i)), p(q), log(p(q))
+	
+	
+reverse	???????????????????????????????????????????????
+
+
+selclu  <3d-file>  <outfile1>  <outfile2>  <skipfactor>  <monomerflag>
+
+	"make selclu"	box-version
+	"make selclup"	pbc-version
+	
+	"Farbige" Darstellung von xyz-files. Outfile1 ist neues xyz-file, 
+	outfile2 ist ein csi gegen T-file im xyz-format. 
+	Monomerflag: Monomere 1(0) an(aus).
+	
+
+sizer  <3d-file>  <outfile>
+	
+	"make sizer"
+	
+	Analyse eines csi-files einer Simulation. Ausgabe: timestep, groesster Cluster,
+	Temperatur, restliches System, Temperatur, average clustersize of biggest cluster
+	
+
+sysdens  <3d-file>  <outfile>  <discard>  <div>
+
+	"make sysdens"
+	
+	Benutzt das xyz-file einer Simulation, um die Systemdichte, unterteilt 
+	in <div>^3-Boxen zu ermitteln. 
+	Ausgabe: AnzahlSubboxen, rho, scaled stats, scaled cum, stat, cum
+
+
+thinout  <3d-file>  <outfile>  <skip.factor>	
+
+	"make thinout"
+
+	Programm zum Ausduennen von xyz-Datenfiles. Alle Parameter kommen aus 
+	den urspruenglichen 3d-files; der skip-factor, jede wievielte 
+	Konfiguration ausgegeben wird.
+
+
+timefile  <3d-file>  <outfile>
+
+	"make timefile"
+	
+	Erzeugt aus dem 3d-file ein STF-File fuer SciAn, in dem die Zeit in [ps]
+	gespeichert ist (fuer die Visualisierung).
+	
+	
+veltest  <3d-file>  <outfile>
+	
+	"make veltest"
+	
+	Analyse des .vel-files einer Simulation. Ausgabe der Statistik von vx 
+	und sqrt(vx^2+vy^2+vz^2) in m/s
+
+*-------------------------------------------------------------------------------
+*-------------------------------------------------------------------------------

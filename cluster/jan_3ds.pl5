@@ -1,0 +1,48 @@
+#!/usr/bin/perl5
+
+@runs = ("0001","0002","0003","0004","0005","0006","0007","0008","0009","0010");
+@temp = ("60Kto30K","60Kto32K","60Kto34K");
+
+
+foreach $a (@runs) {
+  foreach $b (@temp) {
+    foreach $i (1..20) {
+      system("mv template.3d template.3d.old");
+      open(FILE,">$a/$b/$b-$i.3d");
+      open(TEMPLATE, "template.3d");
+      @all_lines = <TEMPLATE>;
+
+#	Beispiel: Startnummer des Zeitschrittes ausrechnen
+      $x=$i-1;
+      $y=$x*5000000;
+
+#	Beispiel: Pfad richtig setzen
+      $all_lines[3] =~ s/platzhalter/$a/g;
+
+#	Beispiel: Ausgabe von xyz ausschalten, falls an sein sollte...
+      $all_lines[5] =~ s/1000/0000/g;
+
+#	Beispiel: Filename fuer .csi
+      $all_lines[12] =~ s/platzhalter/$b-$i/g;
+
+#     	Hier wird die Startnummer gesetzt, die ich oben ausrechne
+#	auf die Leerstelle achten!!
+      $all_lines[21] =~ s/ $y/$y/g;
+
+#	Zeile 43 ist der Name des rst-files.
+      $all_lines[43] =~ s/platzhalter/$a/g;
+
+
+      print "$a, $b, $i\n";
+      foreach $element (@all_lines) {
+        print FILE $element;
+      }
+     close(FILE);
+     print "$a/$b/$b-$i.3d ist angelegt\n";
+     close(TEMPLATE);
+     system("rm template.3d.old");
+    }
+  }	
+}
+print "SUCCESS\n";
+exit;

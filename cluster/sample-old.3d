@@ -1,0 +1,87 @@
+---------1---------2---------3---------4---------5---------6---------7---------8
+Versionsnummer Programm/Inputfile      : 1.12
+---------1---------2---------3---------4---------5---------6---------7---------8
+Pfad fuer folgende Dateien (relativ)   : data/test/
+Dateiname fuer Atompositionen/Zeit     : test.xyz
+Ausgabeintervall (0=keine Ausgabe)     :     0000
+Dateiname fuer Geschwindigkeiten/Zeit  : test.vel
+Ausgabeintervall (0=keine Ausgabe)     :       00
+Dateiname fuer Beschleunigungen/Zeit   : test.acc
+Ausgabeintervall (0=keine Ausgabe)     :      000
+Dateiname fuer Restartfile             : test.rst
+Ausgabeintervall (0=keine Ausgabe)     :     1000
+Dateiname fuer Size-File               : test.csi
+Ausgabeintervall (0=keine Ausgabe)     :     1000
+Dateiname fuer Durchschnitts-File      : test.ave
+Ausgabeintervall (0=keine Ausgabe)     :      500
+Dateiname fuer Raten-File              : test.rat
+Output interval (0: none, 1:all events):      000
+---------1---------2---------3---------4---------5---------6---------7---------8
+timestep length                    [fs]:        2.0
+total number of timesteps              :   100000
+start timestep number                  :   000000
+screen output interval                 :     1000
+---------1---------2---------3---------4---------5---------6---------7---------8
+box size in X-direction            [nm]:       20.0
+box size in Y-direction            [nm]:       20.0
+box size in Z-direction            [nm]:       20.0
+periodic in X  (X = yes, - = no)       : X
+periodic in Y  (X = yes, - = no)       : X
+periodic in Z  (X = yes, - = no)       : X
+Potentialexponent fuer Wand            :        9.0
+Potentialparameter fuer Wand        [K]:      120.0
+Show box corners (X = yes, - = no)     : X
+Resize Box (X = yes, - = no)           : -
+New size of box in X-direction     [nm]:       05.0
+New size of box in Y-direction     [nm]:       05.0
+New size of box in Z-direction     [nm]:       05.0
+maximum resize-step in X           [nm]:        0.04
+maximum resize-step in Y           [nm]:        0.04
+maximum resize-step in Z           [nm]:        0.04
+Time steps between resizes             :       50
+---------1---------2---------3---------4---------5---------6---------7---------8
+use restartfile? (X = yes, - = no)     : -
+file name of Input-Restartfile         : test.rst
+use thermostat? (X = ja, - = nein)     : X
+Pure random velocities after init      : X
+Cluster Thermostat (X = ja, - = nein)  : -
+Cluster Thermostat Timer               :      200
+---------1---------2---------3---------4---------5---------6---------7---------8
+system temperature                  [K]:      150.0
+cluster distance criterion   (in Sigma):        1.8
+potential cutoff-Radius      (in Sigma):        5.0
+skin-Radius of neighborlist  (in Sigma):        5.2
+Update-Time for Neighbor               :      100
+Update-Time for Natom-change           :      500
+---------1---------2---------3---------4---------5---------6---------7---------8
+Anzahl der Atomsorten                  :        1
+---------1---------2---------3---------4---------5---------6---------7---------8
+atom symbol                            : C
+number of atoms                        :      170
+atom mass                           [u]:       40.0
+Lennard-Jones Sigma                [nm]:        0.3405
+Lennard-Jones Epsilon               [K]:      120.0
+potential exponent                     :       12.0
+potentialexponent attractive           :        6.0
+Connect to thermostat (X = yes, - = no): -
+Change number (X = yes, - = no)        : -
+New number of atoms                    :      500
+---------1---------2---------3---------4---------5---------6---------7---------8
+atom symbol                            : C
+number of atoms                        :      170
+atom mass                           [u]:       40.0
+Lennard-Jones Sigma                [nm]:        0.3405
+Lennard-Jones Epsilon               [K]:      120.0
+potential exponent                     :       12.0
+potentialexponent attractive           :        6.0
+Connect to thermostat (X = yes, - = no): X
+Change number (X = yes, - = no)        : -
+New number of atoms                    :      500
+---------1---------2---------3---------4---------5---------6---------7---------8
+check nucleation? (X = yes, - = no )   : -
+min. cluster size to abort             :       15
+time steps between checking            :     1000
+---------1---------2---------3---------4---------5---------6---------7---------8
+---------1---------2---------3---------4---------5---------6---------7---------8
+---------1---------2---------3---------4---------5---------6---------7---------8
+---------1---------2---------3---------4---------5---------6---------7---------8

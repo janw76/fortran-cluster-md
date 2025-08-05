@@ -1,0 +1,14 @@
+#!/usr/bin/perl5
+
+@runs = ("0001", "0002","0003","0004","0005","0006","0007","0008","0009", "0010");
+@temp = ("60Kto30K", "60Kto32K", "60Kto34K");
+
+
+foreach $a (@runs) {
+  foreach $b (@temp) {
+      system("mkdir $a/$b");
+      print "$a/$b created.\n";
+  }	
+}
+print "SUCCESS\n";
+exit;

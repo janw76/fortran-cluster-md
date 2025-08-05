@@ -1,0 +1,154 @@
+*===============================================================================
+*	ACCELERATION ATOM-ATOM
+*===============================================================================
+* file: for-a-lj-n-pbc-m.f
+*-------------------------------------------------------------------------------
+* In this routine the forces between the individual atoms are summed and
+* converted to accelerations. The Lennard-Jones 12-6-potential is used.
+* This routine uses the LJ-potential with a cutoff distance.
+* Additionally, the routine uses a neighborlist to cut down the numeber of
+* time consuming force calculations.
+* Furthermore, periodic boundary conditions are in use.
+* This routine can handle 2 species of atoms
+* Species 1 is connected with the LJ potential,
+* species 2 is connected with r^-12 potential,
+* species 1-2 interaction is r^-12
+*-------------------------------------------------------------------------------
+
+	subroutine AccAtom()
+	
+	implicit none
+
+	include 'const.inc'
+	include 'atomc.inc'
+	include 'atomp.inc'
+	include 'energ.inc'
+	include 'boxpp.inc'
+
+	integer i,j,k,ij
+	double precision atr2,rij2,rij6
+	double precision fij,esum
+	double precision dx,dy,dz,tx,ty,tz
+	double precision c111,c112,c113
+	double precision c221,c222,c121,c122
+	double precision eps11,eps22,eps12
+	double precision bf1,bf2
+	double precision fsumx(mxa),fsumy(mxa),fsumz(mxa)
+	double precision ibx,iby,ibz,iatm
+
+*-------------------------------------------------------------------------------
+* i,j		: standard loop variables
+* k		: index for neighborlist
+* dx,dy,dz	: components of distance between two atoms i,j
+* tx,ty,tz	: temporary variables for coordinate of atom i
+* c1		: constant for the 1st LJ-term
+* c2		: constant for the 2nd LJ-term
+* c3		: constant for the 1st LJ-term * 1/2
+* atr2		; inverse of squared diameter of the atoms
+* rij2		: inverse of the distance between two atoms, squared 
+* rij6		: inverse of the distance between two atoms, 6th power
+* fij		: force between two atoms i,j
+* esum		: sum of potential, converted to epot afterwards
+* fsumx()	: field for sum of forces, converted into ax() afterwards
+* fsumy()	: field for sum of forces, converted into ax() afterwards
+* fsumz()	: field for sum of forces, converted into ax() afterwards
+* bf1,bf2	: box-factors for minimum image convention
+* ibx,iby,ibz	: inverse of Boxlengths (needed for PBC)
+* iatm		: inverse of the atomic mass (needed for force-->vel)
+*-------------------------------------------------------------------------------
+
+	atr2=atrcut*atrcut
+	c111=apsig(1)*apsig(1)*apsig(1)*apsig(1)*apsig(1)*apsig(1)
+	c112=c111*c111
+	c113=0.5d0*c111
+	eps11=apeps(1)
+
+	c221=apsig(2)*apsig(2)*apsig(2)*apsig(2)*apsig(2)*apsig(2)
+	c222=c221*c221
+	eps22=apeps(2)
+
+	c121=0.5d0*(apsig(1)+apsig(2))
+	c121=c121*c121*c121*c121*c121*c121
+	c122=c121*c121
+	eps12=dsqrt(apeps(1)*apeps(2))
+
+	bf1=2.0d0+int(atrskin/atr)
+	bf2=bf1+0.5d0
+	esum=0.0d0
+
+	ibx=1.0d0/boxx
+	iby=1.0d0/boxy
+	ibz=1.0d0/boxz
+
+	do i=1,natom
+	  fsumx(i)=0.0d0
+	  fsumy(i)=0.0d0
+	  fsumz(i)=0.0d0
+	enddo
+
+	k=1
+	
+10	i=-atnlist(k)
+	if (i.eq.natom) goto 30
+
+	  k=k+1
+	  tx=x(i)
+	  ty=y(i)
+  	  tz=z(i)
+
+20	  j=atnlist(k)
+	  if (j.gt.0) then
+	    k=k+1
+
+	    dx=tx-x(j)
+	    dy=ty-y(j)
+	    dz=tz-z(j)
+	    dx=dx+boxx*(bf1-int(bf2+dx*ibx))
+	    dy=dy+boxy*(bf1-int(bf2+dy*iby))
+	    dz=dz+boxz*(bf1-int(bf2+dz*ibz))
+
+	    rij2=dx*dx+dy*dy+dz*dz
+
+	    if (rij2.le.atr2) then
+	      rij2=1.0d0/rij2
+	      rij6=rij2*rij2*rij2
+
+	ij=api(i)+api(j)
+	if (ij.eq.2) then
+	      fij=eps11*48.0d0*rij2*rij6*(c112*rij6-c113)
+	      esum=esum+eps11*4.0d0*rij6*(c112*rij6-c111)
+	  elseif (ij.eq.4) then
+	      fij=eps22*12.0d0*c222*rij2*rij6*rij6
+	      esum=esum+eps22*c222*rij6*rij6
+*	 write (*,*) 'NANU ... 2 Sorte 2?????'
+	  elseif (ij.eq.3) then
+	      fij=eps12*12.0d0*c122*rij2*rij6*rij6
+	      esum=esum+eps12*c122*rij6*rij6
+*	 write (*,*) 'NANU ... Sorte 1, Sorte 2?????'
+	  else
+	    write (*,*) 'Nanu???',i,j
+	endif
+
+	      fsumx(i)=fsumx(i)+fij*dx
+	      fsumx(j)=fsumx(j)-fij*dx
+	      fsumy(i)=fsumy(i)+fij*dy
+	      fsumy(j)=fsumy(j)-fij*dy
+	      fsumz(i)=fsumz(i)+fij*dz
+	      fsumz(j)=fsumz(j)-fij*dz
+	    endif
+	    goto 20
+	  endif
+	goto 10
+
+30	continue
+
+	epot=esum
+	do i=1,natom
+	  iatm=1.0d0/apmas(api(i))
+	  ax(i)=ax(i)+fsumx(i)*iatm
+	  ay(i)=ay(i)+fsumy(i)*iatm
+	  az(i)=az(i)+fsumz(i)*iatm
+	enddo
+	return
+	end
+*-------------------------------------------------------------------------------

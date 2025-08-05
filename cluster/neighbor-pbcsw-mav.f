@@ -1,0 +1,110 @@
+*===============================================================================
+* 	NEIGHBOR LIST - PBC
+*===============================================================================
+* file: neighbor-pbcsw-mav.f
+*-------------------------------------------------------------------------------
+* This routine determines the neighbors for each atom
+* this saves a lot of (nearly) useless force calculations
+* This routine additionally uses the periodic boundary conditions
+* Additionally optimized for use with a moving average to cut the number
+* of list updates
+* In addition, beriodic boudaries can be switched off
+*-------------------------------------------------------------------------------
+
+	subroutine neighbor(step)
+
+	implicit none
+
+	include 'const.inc'
+	include 'atomc.inc'
+	include 'atomp.inc'
+	include 'boxpp.inc'
+	include 'timep.inc'
+	include 'dmmpp.inc'
+
+	integer step
+	integer i,j,ind
+	double precision tx,ty,tz,dx,dy,dz,r2,rs2
+	double precision ibx,iby,ibz
+
+*-------------------------------------------------------------------------------
+* step		: timestep number
+*...............................................................................
+* i		: standard loop variable
+* j		: standard loop variable
+* ind		: index for neighborlist
+* tx,ty,tz	: temporary variables for position of atom i
+* dx,dy,dz	: components for distance of two atoms
+* r2		: Square of distance between two atoms
+* rs2		: square of skin radius
+* ibx,iby,ibz	: inverse of boxlengths (needed for PBC)
+*-------------------------------------------------------------------------------
+
+	ind=1
+	
+	ibx=1.0d0/boxx
+	iby=1.0d0/boxy
+	ibz=1.0d0/boxz
+
+	if (dmms.gt.(atrskin-atrcut)) then
+	  write (*,*) '*** FATAL ERROR! ***  Skin radius exceeded!!'
+	  stop
+	endif
+
+	dmmav=real(dmmst)*dmmsu/256.0d0
+
+	if (step.ne.btim.and.step.gt.0) then
+	  atrskin=atrcut+(atrskin-atrcut)*dble(nbtim)/dble(dmmst)
+	  atrskin=min(boxx/2.0d0,atrskin)
+	  atrskin=min(boxy/2.0d0,atrskin)
+	  atrskin=min(boxz/2.0d0,atrskin)
+	endif
+
+	step=abs(step)
+
+	rs2=atrskin*atrskin
+
+	do i=1,natom
+	  if (bperx.eq.'X') x(i)=dmod(dmod(x(i),boxx)+boxx,boxx)
+	  if (bpery.eq.'X') y(i)=dmod(dmod(y(i),boxy)+boxy,boxy)
+	  if (bperz.eq.'X') z(i)=dmod(dmod(z(i),boxz)+boxz,boxz)
+	enddo
+
+	do i=1,natom
+	  atnlist(ind)=-i
+	  atnidx(i)=ind
+	  ind=ind+1
+	  tx=x(i)
+	  ty=y(i)
+	  tz=z(i)
+	  do j=i+1,natom
+	    dx=tx-x(j)
+	    dy=ty-y(j)
+	    dz=tz-z(j)
+	    if (bperx.eq.'X') dx=dx+boxx-boxx*int(1.5d0+dx*ibx)
+	    if (bpery.eq.'X') dy=dy+boxy-boxy*int(1.5d0+dy*iby)
+	    if (bperz.eq.'X') dz=dz+boxz-boxz*int(1.5d0+dz*ibz)
+	    r2=dx*dx+dy*dy+dz*dz
+	    if (r2.le.rs2) then
+	      atnlist(ind)=j
+	      ind=ind+1
+	    endif
+	  enddo
+	  if (ind+natom.gt.mxnlist) then
+	    write (*,*) '*** FATAL ERROR *** '//
+     $                  'Neighborlist is nearly full!'
+	    stop
+	  endif
+	enddo
+
+	dmmax=max(dmms,dmmax)
+	write (*,10) step,ind-1-natom,dmms,dmmav,dmmax,
+     $	             atrskin-atrcut, atrskin/atr
+	dmms=0.0d0
+	dmmst=0
+10	format (2(I10,2X),5(F8.4,2X))
+
+	return
+	end
+
+*-------------------------------------------------------------------------------
