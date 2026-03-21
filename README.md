@@ -25,6 +25,7 @@ Supersaturated argon vapor spontaneously forms liquid droplets through nucleatio
 
 ### References
 
+- Wonczak, S. (2001). *Molekulardynamische Simulationen von Argon-Clustern*. PhD thesis, Universität zu Köln. **(Original CLUSTER code)**
 - Wedekind, J. (2006). *Nano-Droplets at Birth — Computer Experiments on Gas Phase Nucleation*. PhD thesis, Universität zu Köln.
 - Wedekind, J., Strey, R., & Reguera, D. (2007). New method to analyze simulations of activated processes. *J. Chem. Phys.* **126**, 134103.
 - Wedekind, J., Reguera, D., & Strey, R. (2006). Finite-size effects in simulations of nucleation. *J. Chem. Phys.* **125**, 214505.
@@ -360,9 +361,13 @@ Input is in nm and atomic mass units; conversion happens in `read-3d.f`.
 
 ---
 
-## Historical Note
+## Authors & Attribution
 
-This code was originally written by **Stephan Wonczak** starting in 1997 and substantially extended by **Jan Wedekind** for his PhD work (2003–2006), both at the Institute for Physical Chemistry, Universität zu Köln, in the group of Prof. Reinhard Strey.
+The core simulation package **CLUSTER** was developed by **Stefan Wonczak** for his PhD thesis at the Universität zu Köln (2001). **Jan Wedekind** substantially extended the code for his own PhD work (2003–2006), adding the MFPT analysis framework, new thermostats, finite-size optimization, and additional analysis tools. Both worked at the Institute for Physical Chemistry in the group of Prof. Reinhard Strey.
+
+A complete documentation of the original CLUSTER package can be found in Wonczak's thesis:
+
+> Wonczak, S. (2001). *Molekulardynamische Simulationen von Argon-Clustern*. PhD thesis, Universität zu Köln.
 
 The code reflects the practices of its era:
 - **Fortran 77** fixed-format (columns 1–72, continuation in column 6)
