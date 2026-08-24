@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "fortran_cluster_md",
+  "project_id": "6507f498-8584-418f-857c-3bce0956f229"
+}
