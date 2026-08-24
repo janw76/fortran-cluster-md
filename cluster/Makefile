@@ -242,9 +242,6 @@ mav:		$(MAVOBJ)
 mul:		$(MULOBJ)
 		$(FF) $(FLAGS) $(MULOBJ) -o cluster-m
 
-vmd:		$(VMD)
-		$(FF) $(FLAGS) $(VMD) -o clu-vmd
-
 nuc:		$(NUC)
 		$(FF) $(FLAGS) $(NUC) -o clu-nuc
 
@@ -386,12 +383,10 @@ probability:	bdir $(PROBAB)
 		$(FF) $(FLAGS) $(PROBAB) -o $(HOME)/bin/probability-distrib
 
 clean:
-	touch remove.o
-	rm *.o
+	rm -f *.o
 
 archive:
-	touch archive.tar.gz
-	rm archive.tar.gz
+	rm -f archive.tar.gz
 	tar -cvf archive.tar *.f *.inc Makefile sample.3d README \
                              helpers/*
 	gzip archive.tar
@@ -469,9 +464,6 @@ stoddard-pbc.o:	stoddard-pbc.f \
 stoddard-pbc-n.o:	stoddard-pbc-n.f \
 		const.inc atomp.inc atomc.inc cvtpp.inc boxpp.inc
 
-stoddard-pbcsw-n.o:	stoddard-pbcsw-n.f \
-		const.inc atomp.inc atomc.inc cvtpp.inc boxpp.inc
-
 stoddard-pbc-n-m.o:     stoddard-pbc-n-m.f \
                 const.inc atomp.inc atomc.inc cvtpp.inc boxpp.inc
 
@@ -497,22 +489,7 @@ neighbor-pbc-mav-silent.o:	neighbor-pbc-mav.f \
 		const.inc atomp.inc atomc.inc boxpp.inc dmmpp.inc
 		$(FF) $(FLAGS) $(CPPFLAG) -DSILENT -c neighbor-pbc-mav.f -o neighbor-pbc-mav-silent.o
 
-neighbor-pbcsw-mav.o:	neighbor-pbcsw-mav.f \
-		const.inc atomp.inc atomc.inc boxpp.inc dmmpp.inc
-
 for-a-dummy.o:	for-a-dummy.f
-
-for-a-lj1.o:	for-a-lj1.f \
-		const.inc atomp.inc atomc.inc energ.inc
-
-for-a-lj2.o:	for-a-lj2.f \
-		const.inc atomp.inc atomc.inc energ.inc
-
-for-a-lj3.o:	for-a-lj3.f \
-		const.inc atomp.inc atomc.inc energ.inc
-
-for-a-lj4.o:	for-a-lj4.f \
-		const.inc atomp.inc atomc.inc energ.inc
 
 for-a-lj-n.o:	for-a-lj-n.f \
 		const.inc atomp.inc atomc.inc energ.inc
@@ -523,46 +500,10 @@ for-a-lj-n-pbc.o:	for-a-lj-n-pbc.f \
 for-a-lj-n-pbc-m.o:	for-a-lj-n-pbc-m.f \
 		const.inc atomp.inc atomc.inc energ.inc boxpp.inc
 
-for-a-lj-n-pbcsw.o:	for-a-lj-n-pbcsw.f \
-		const.inc atomp.inc atomc.inc energ.inc boxpp.inc
-
 for-w-dummy.o:	for-w-dummy.f
-
-for-w-i12.o:	for-w-i12.f \
-		const.inc atomp.inc atomc.inc boxpp.inc energ.inc
 
 for-w-i9.o:	for-w-i9.f \
 		const.inc atomp.inc atomc.inc boxpp.inc energ.inc
-
-for-w-i9g.o:	for-w-i9g.f \
-		const.inc atomp.inc atomc.inc boxpp.inc energ.inc
-
-for-w-iX.o:	for-w-iX.f \
-		const.inc atomp.inc atomc.inc boxpp.inc energ.inc
-
-for-w-i9-dbl.o:	for-w-i9-dbl.f \
-		const.inc atomp.inc atomc.inc boxpp.inc energ.inc
-
-for-w-lj.o:	for-w-lj.f \
-		const.inc atomp.inc atomc.inc boxpp.inc energ.inc
-
-int-euler1.o:	int-euler1.f \
-		const.inc atomp.inc atomc.inc timep.inc energ.inc
-
-int-euler2.o:	int-euler2.f \
-		const.inc atomp.inc atomc.inc timep.inc energ.inc
-
-int-gear3.o:	int-gear3.f \
-		const.inc atomp.inc atomc.inc timep.inc energ.inc
-
-int-gear4.o:	int-gear4.f \
-		const.inc atomp.inc atomc.inc timep.inc energ.inc
-
-int-gear5.o:	int-gear5.f \
-		const.inc atomp.inc atomc.inc timep.inc energ.inc
-
-int-verlet.o:	int-verlet.f \
-		const.inc atomp.inc atomc.inc timep.inc energ.inc
 
 int-verlet-dmm.o:	int-verlet-dmm.f \
 		const.inc atomp.inc atomc.inc timep.inc energ.inc dmmpp.inc
