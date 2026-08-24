@@ -72,12 +72,12 @@
 !$OMP END PARALLEL DO
 
 	k=1
-	
-	! Main force calculation loop with OpenMP parallelization
-!$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,k,tx,ty,tz,dx,dy,dz,rij2,rij6,fij,ij,esum_local,tid) REDUCTION(+:esum)
 	esum_local = 0.0d0
-	tid = 1  ! Thread ID for debugging
-!$OMP DO SCHEDULE(GUIDED) 
+
+	! Main force calculation loop: sequential pointer-chase over the packed
+	! neighbor list (atnlist). Not a valid OMP worksharing loop (bounds are
+	! data-dependent, k is a shared traversal cursor), so this section runs
+	! single-threaded; only the array-fill loops above/below are OMP-parallel.
 10	do while (k.le.mxnlist)
 	  i=-atnlist(k)
 	  if (i.eq.natom) goto 30
@@ -138,8 +138,6 @@
 	enddo
 30	continue
 	esum = esum + esum_local
-!$OMP END DO
-!$OMP END PARALLEL
 
 	epot=esum*4.0d0
 	

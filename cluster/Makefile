@@ -217,11 +217,13 @@ PROBAB=	probability-distrib.o
 # Intel Linux Fortran Compiler
 FLAGS= -O3 -warn -traceback
 # Preprocessor flag for neighbor-pbc-mav.f (SILENT toggle). ifort: -fpp,
-# gfortran: -cpp. Override on the command line if compiling that file with
-# APPLE_FF/gfortran (not needed for any target in this Makefile today).
+# gfortran: -cpp. The apple-silent/apple-frenkel targets override this to
+# -cpp via target-specific variables below (see apple-silent/apple-frenkel).
 CPPFLAG= -fpp
 # Apple Silicon optimized flags with OpenMP
-APPLE_FLAGS= -O3 -fopenmp -march=native -ffast-math -funroll-loops -ftree-vectorize
+# -std=legacy -ffixed-line-length-132: this is fixed-form F77 source with
+# lines >72 cols and legacy extensions; gfortran defaults reject both.
+APPLE_FLAGS= -O3 -fopenmp -march=native -ffast-math -funroll-loops -ftree-vectorize -std=legacy -ffixed-line-length-132
 # Apple Silicon OpenMP runs: export OMP_NUM_THREADS=$(sysctl -n hw.perflevel0.logicalcpu)
 #   export OMP_PROC_BIND=true
 #   export OMP_PLACES=cores
@@ -261,6 +263,13 @@ nose:		$(NOSE)
 		$(FF) $(FLAGS) $(NOSE) -o clu-nose
 
 # Apple Silicon optimized targets
+# Target-specific variable overrides: these propagate to the prerequisite
+# object builds too (GNU make), so apple-silent/apple-frenkel compile AND
+# link entirely with gfortran instead of mixing with the default FF=ifort.
+apple-silent apple-frenkel: FF=$(APPLE_FF)
+apple-silent apple-frenkel: FLAGS=$(APPLE_FLAGS)
+apple-silent apple-frenkel: CPPFLAG=-cpp
+
 apple-silent:	$(APPLE_SILENT)
 		$(APPLE_FF) $(APPLE_FLAGS) $(APPLE_SILENT) -o clu-silent-omp
 
