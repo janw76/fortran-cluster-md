@@ -346,7 +346,6 @@ pressw  <3d-file>  <outfile>	OBSOLETE
 	Kraft auf die Waende zu berechnen. NICHT FUER PBC !!!
 	
 
-rdf-org	 alte Version von rdf.
 
 rdf  <3d-file>  <outfile>  <streu-file>  <discard>  <vstep (0.02 guter Wert)>
 
