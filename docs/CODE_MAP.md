@@ -261,9 +261,6 @@ Declares bond, angle, and torsion connectivity arrays. Was never completed — t
 
 **Includes:** `const.inc`, `atomc.inc`, `atomp.inc`, `energ.inc`, `boxpp.inc`
 
-#### `for-a-lj-n-pbc-mr.f` — `subroutine AccAtom()`
-**Purpose:** Variant with reversed pair ordering.
-
 #### `for-a-lj-n-pbc.f` — `subroutine AccAtom()`
 **Purpose:** Single-species LJ with PBC and neighbor list.
 
@@ -292,8 +289,8 @@ Declares bond, angle, and torsion connectivity arrays. Was never completed — t
 #### `for-w-iX.f` — `subroutine AccWall()`
 **Purpose:** Repulsive r⁻ˣ wall, exponent read from `.3d` file.
 
-#### `for-w-i9-dbl.f` / `for-w-i9-dbl-exp.f` — `subroutine AccWall()`
-**Purpose:** Double-wall variants with exponential decay.
+#### `for-w-i9-dbl.f` — `subroutine AccWall()`
+**Purpose:** Double-wall variant with exponential decay.
 
 #### `for-w-i9g.f` — `subroutine AccWall()`
 **Purpose:** r⁻⁹ wall with ghost particles.
@@ -319,8 +316,7 @@ Declares bond, angle, and torsion connectivity arrays. Was never completed — t
 
 **Includes:** `const.inc`, `atomc.inc`, `atomp.inc`, `boxpp.inc`, `timep.inc`, `dmmpp.inc`
 
-#### `neighbor-pbc-mav-silent.f`
-**Purpose:** Same as above but suppresses diagnostic output. For production runs.
+Silent variant: the same file compiled with `-fpp -DSILENT` (object still named `neighbor-pbc-mav-silent.o`) suppresses the per-step diagnostic write. For production runs.
 
 #### `neighbor-pbc.f`
 **Purpose:** PBC neighbor list without adaptive skin.
@@ -360,7 +356,7 @@ Declares bond, angle, and torsion connectivity arrays. Was never completed — t
 #### `stoddard-pbc-n-m.f`
 **Purpose:** Multi-species with PBC, Stillinger only (no Frenkel).
 
-#### `stoddard-pbc-n.f` / `stoddard-pbc-n-org.f`
+#### `stoddard-pbc-n.f`
 **Purpose:** Single-species with PBC and neighbor list optimization.
 
 #### `stoddard-pbcsw-n.f`
@@ -528,11 +524,11 @@ All helpers are standalone programs that read simulation output files for post-p
 | `veltest.f` | `veltest` | Velocity distribution statistics |
 | `sysdens.f` | `sysdens` | System density on a spatial grid |
 | `timefile.f` | `timefile` | Generate SciAn time file from .3d |
-| `makelog.f` / `makelog_1.f` | `makelog` | Generate log files |
+| `makelog.f` | `makelog` | Generate log files |
 | `stotest.f` | `stotest` | Test Stoddard cluster routine on XYZ data |
 | `rate-xyz.f` | `rate-xyz` | Compute rates from XYZ trajectories |
 | `ratstat.f` | `ratstat` | Statistical analysis of rate data |
-| `ratstat-t.f` / `ratstat-t-old.f` | `ratstat-t` | Time-resolved rate statistics |
+| `ratstat-t.f` | `ratstat-t` | Time-resolved rate statistics |
 | `passage-time.f` | `passage-time` | Mean first-passage time analysis |
 | `mpt.f` | `mpt` | MPT helper utility |
 | `tempavg.f` / `tempavg2.f` | `tempavg` | Cluster temperature averaging |
@@ -540,9 +536,6 @@ All helpers are standalone programs that read simulation output files for post-p
 | `t-hist.f` | `t-hist` | Temperature histograms |
 | `diffusivity.f` | `diffusivity` | Barrier diffusivity from sizer output |
 | `probability-distrib.f` | `probability` | Cluster size probability distributions |
-| `snipfile.f` | `snipfile` | Extract portions of data files |
-| `traject.f` | `traject` | Trajectory analysis |
-| `pos.f` | `pos` | Position analysis |
 
 ---
 
@@ -561,7 +554,7 @@ program cluster (main.f)
 │                          ├── swap()
 │                          ├── stopdead()  [stopdead-m.f]
 │                          │   └── thermostat()  [scalev-m.f]
-│                          ├── neighbor()  [neighbor-pbc-mav-silent.f]
+│                          ├── neighbor()  [neighbor-pbc-mav.f -DSILENT]
 │                          ├── AccAtom()   [for-a-lj-n-pbc-m.f]
 │                          ├── AccWall()   [for-w-dummy.f]
 │                          └── integrator() × 100 warmup
@@ -649,16 +642,6 @@ program cluster (main.f)
 ---
 
 ## Miscellaneous Files
-
-### Perl Scripts
-- `jan_3ds.pl5` — Perl script to generate `.3d` input files for batch simulation campaigns
-- `jan_verzeichnisse.pl5` — Perl script to create directory structures for batch runs
-
-### Test Files
-- `test.f` — Minimal test program (`write (*,*) 'hello'`)
-- `hallowelt.f` — "Hello World" in Fortran
-- `prim3.f` — Prime number test
-- `test1.3d` — Test input configuration
 
 ### Data Files (helpers/)
 - `nlist.dat` — Sample neighbor list data for testing

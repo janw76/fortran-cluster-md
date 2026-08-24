@@ -10,7 +10,7 @@
 - **Makefile-based build** with Intel `ifort` as default compiler
 - **German comments** mixed with English
 - **No version control integration** (archive target creates `.tar.gz`)
-- **No unit tests** (just `test.f` = hello world)
+- **No unit tests**
 - **No documentation** beyond the original German README (now rectified)
 
 ### What Works Well
