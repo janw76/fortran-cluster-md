@@ -458,6 +458,9 @@ resize2.o:	resize2.f \
 stopdead.o:	stopdead.f \
 		const.inc atomc.inc atomp.inc energ.inc
 
+stopdead-m.o:	stopdead-m.f \
+		const.inc atomc.inc atomp.inc energ.inc
+
 rates.o:	rates.f \
 		const.inc atomp.inc atomc.inc cvtpp.inc
 
@@ -474,6 +477,9 @@ stoddard-pbc-n.o:	stoddard-pbc-n.f \
 		const.inc atomp.inc atomc.inc cvtpp.inc boxpp.inc
 
 stoddard-pbc-n-m.o:     stoddard-pbc-n-m.f \
+                const.inc atomp.inc atomc.inc cvtpp.inc boxpp.inc
+
+stoddard-pbc-n-m-fre.o:     stoddard-pbc-n-m-fre.f \
                 const.inc atomp.inc atomc.inc cvtpp.inc boxpp.inc
 
 stoddard-pbc-n-m-fre-mov.o:     stoddard-pbc-n-m-fre-mov.f \
@@ -498,6 +504,9 @@ neighbor-pbc-mav-silent.o:	neighbor-pbc-mav.f \
 		const.inc atomp.inc atomc.inc boxpp.inc dmmpp.inc
 		$(FF) $(FLAGS) $(CPPFLAG) -DSILENT -c neighbor-pbc-mav.f -o neighbor-pbc-mav-silent.o
 
+neighbor-pbc-mav-omp.o:	neighbor-pbc-mav-omp.f \
+		const.inc atomp.inc atomc.inc boxpp.inc timep.inc dmmpp.inc
+
 for-a-dummy.o:	for-a-dummy.f
 
 for-a-lj-n.o:	for-a-lj-n.f \
@@ -509,6 +518,9 @@ for-a-lj-n-pbc.o:	for-a-lj-n-pbc.f \
 for-a-lj-n-pbc-m.o:	for-a-lj-n-pbc-m.f \
 		const.inc atomp.inc atomc.inc energ.inc boxpp.inc
 
+for-a-lj-n-pbc-m-omp.o:	for-a-lj-n-pbc-m-omp.f \
+		const.inc atomp.inc atomc.inc energ.inc boxpp.inc
+
 for-w-dummy.o:	for-w-dummy.f
 
 for-w-i9.o:	for-w-i9.f \
@@ -518,6 +530,9 @@ int-verlet-dmm.o:	int-verlet-dmm.f \
 		const.inc atomp.inc atomc.inc timep.inc energ.inc dmmpp.inc
 
 int-verlet-mav.o:	int-verlet-mav.f \
+		const.inc atomp.inc atomc.inc timep.inc energ.inc dmmpp.inc
+
+int-verlet-mav-omp.o:	int-verlet-mav-omp.f \
 		const.inc atomp.inc atomc.inc timep.inc energ.inc dmmpp.inc
 
 int-verlet-nh-mav.o:	int-verlet-nh-mav.f \
@@ -569,6 +584,9 @@ wrt-xyz.o:	wrt-xyz.f \
 
 wrt-xyz-m.o:	wrt-xyz-m.f \
 		const.inc atomp.inc atomc.inc boxpp.inc timep.inc
+
+wrt-xyz-m-vmd.o:	wrt-xyz-m-vmd.f \
+		const.inc atomp.inc atomc.inc boxpp.inc timep.inc filep.inc
 
 wrt-xyz-m-ats1.o:	wrt-xyz-m-ats1.f \
 		const.inc atomp.inc atomc.inc boxpp.inc timep.inc
