@@ -218,8 +218,6 @@ PROBAB=	probability-distrib.o
 FLAGS= -O3 -warn -traceback
 # Apple Silicon optimized flags with OpenMP
 APPLE_FLAGS= -O3 -fopenmp -march=native -ffast-math -funroll-loops -ftree-vectorize
-# GPU acceleration flags (experimental)
-GPU_FLAGS= -O3 -fopenmp -foffload=nvptx-none -march=native
 # FF=	f77
 FF=	ifort
 # Apple Silicon compiler (gfortran from Homebrew)
@@ -264,10 +262,6 @@ apple-silent:	$(APPLE_SILENT)
 
 apple-frenkel:	$(APPLE_FRENKEL)
 		$(APPLE_FF) $(APPLE_FLAGS) $(APPLE_FRENKEL) -o clu-fre-omp
-
-# Experimental GPU acceleration (requires compatible hardware)
-gpu-silent:	$(APPLE_SILENT)
-		$(APPLE_FF) $(GPU_FLAGS) $(APPLE_SILENT) -o clu-silent-gpu
 
 # Performance comparison target
 benchmark:	apple-silent silent
