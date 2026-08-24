@@ -51,9 +51,9 @@
 	c122=c121*c121
 	c123=0.5d0*c121
 
-	eps11=apeps(1)*apeps(1)
-	eps22=apeps(2)*apeps(2)
-	eps12=apeps(1)*apeps(2)
+	eps11=apeps(1)
+	eps22=apeps(2)
+	eps12=dsqrt(apeps(1)*apeps(2))
 
 	bf1=int(atrskin/atr)+2.0d0
 	bf2=bf1+0.5d0
@@ -101,22 +101,24 @@
 	    rij2=dx*dx+dy*dy+dz*dz
 
 	    if (rij2.le.atr2) then
-	      ij=api(i)*10+api(j)
+	      ij=api(i)+api(j)
 	      rij2=1.0d0/rij2
 	      rij6=rij2*rij2*rij2
-	      
+
 	      ! Species-specific interactions
-	      if (ij.eq.11) then
-	        fij=rij2*rij6*(c112*rij6-c113)*eps11
-	        esum_local=esum_local+rij6*(c112*rij6-c111)*eps11
-	      else if (ij.eq.22) then
-	        fij=rij2*rij6*c222*eps22*12.0d0
-	        esum_local=esum_local+rij6*c222*eps22
+	      if (ij.eq.2) then
+	        fij=eps11*48.0d0*rij2*rij6*(c112*rij6-c113)
+	        esum_local=esum_local+eps11*4.0d0*rij6*(c112*rij6-c111)
+	      else if (ij.eq.4) then
+	        fij=eps22*48.0d0*rij2*rij6*(c222*rij6-c223)
+	        esum_local=esum_local+eps22*4.0d0*rij6*(c222*rij6-c221)
+	      else if (ij.eq.3) then
+	        fij=eps12*48.0d0*rij2*rij6*(c122*rij6-c123)
+	        esum_local=esum_local+eps12*4.0d0*rij6*(c122*rij6-c121)
 	      else
-	        fij=rij2*rij6*c122*eps12*12.0d0
-	        esum_local=esum_local+rij6*c122*eps12
+	        write (*,*) 'Nanu???',i,j
 	      endif
-	      
+
 	      ! Atomic force updates with reduction
 !$OMP ATOMIC
 	      fsumx(i)=fsumx(i)+fij*dx
@@ -139,15 +141,15 @@
 30	continue
 	esum = esum + esum_local
 
-	epot=esum*4.0d0
-	
+	epot=esum
+
 	! Convert forces to accelerations in parallel
 !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,iatm) SCHEDULE(STATIC)
 	do i=1,natom
 	  iatm=1.0d0/apmas(api(i))
-	  ax(i)=ax(i)+48.0d0*fsumx(i)*iatm
-	  ay(i)=ay(i)+48.0d0*fsumy(i)*iatm
-	  az(i)=az(i)+48.0d0*fsumz(i)*iatm
+	  ax(i)=ax(i)+fsumx(i)*iatm
+	  ay(i)=ay(i)+fsumy(i)*iatm
+	  az(i)=az(i)+fsumz(i)*iatm
 	enddo
 !$OMP END PARALLEL DO
 
