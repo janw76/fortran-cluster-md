@@ -216,6 +216,10 @@ PROBAB=	probability-distrib.o
 # FLAGS= -O3 -malign-double
 # Intel Linux Fortran Compiler
 FLAGS= -O3 -warn -traceback
+# Preprocessor flag for neighbor-pbc-mav.f (SILENT toggle). ifort: -fpp,
+# gfortran: -cpp. Override on the command line if compiling that file with
+# APPLE_FF/gfortran (not needed for any target in this Makefile today).
+CPPFLAG= -fpp
 # Apple Silicon optimized flags with OpenMP
 APPLE_FLAGS= -O3 -fopenmp -march=native -ffast-math -funroll-loops -ftree-vectorize
 # FF=	f77
@@ -484,9 +488,11 @@ neighbor-pbc.o:	neighbor-pbc.f \
 
 neighbor-pbc-mav.o:	neighbor-pbc-mav.f \
 		const.inc atomp.inc atomc.inc boxpp.inc dmmpp.inc
+		$(FF) $(FLAGS) $(CPPFLAG) -c neighbor-pbc-mav.f
 
-neighbor-pbc-mav-silent.o:	neighbor-pbc-mav-silent.f \
+neighbor-pbc-mav-silent.o:	neighbor-pbc-mav.f \
 		const.inc atomp.inc atomc.inc boxpp.inc dmmpp.inc
+		$(FF) $(FLAGS) $(CPPFLAG) -DSILENT -c neighbor-pbc-mav.f -o neighbor-pbc-mav-silent.o
 
 neighbor-pbcsw-mav.o:	neighbor-pbcsw-mav.f \
 		const.inc atomp.inc atomc.inc boxpp.inc dmmpp.inc

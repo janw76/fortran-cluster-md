@@ -99,8 +99,10 @@
 	enddo
 
 	dmmax=max(dmms,dmmax)
+#ifndef SILENT
 	write (*,10) step,ind-1-natom,dmms,dmmav,dmmax,
      $	             atrskin-atrcut, atrskin/atr
+#endif
 	dmms=0.0d0
 	dmmst=0
 10	format (2(I10,2X),5(F8.4,2X))
