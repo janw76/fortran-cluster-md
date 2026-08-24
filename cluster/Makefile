@@ -222,6 +222,9 @@ FLAGS= -O3 -warn -traceback
 CPPFLAG= -fpp
 # Apple Silicon optimized flags with OpenMP
 APPLE_FLAGS= -O3 -fopenmp -march=native -ffast-math -funroll-loops -ftree-vectorize
+# Apple Silicon OpenMP runs: export OMP_NUM_THREADS=$(sysctl -n hw.perflevel0.logicalcpu)
+#   export OMP_PROC_BIND=true
+#   export OMP_PLACES=cores
 # FF=	f77
 FF=	ifort
 # Apple Silicon compiler (gfortran from Homebrew)

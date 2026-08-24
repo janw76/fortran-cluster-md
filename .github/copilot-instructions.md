@@ -46,7 +46,7 @@ make clean
 make <variant>  # e.g., make silent, make frenkel
 
 # Apple Silicon optimized builds with OpenMP
-./setup_apple_silicon.sh  # Configure environment
+export OMP_NUM_THREADS=$(sysctl -n hw.perflevel0.logicalcpu)  # Configure environment
 make apple-silent          # Parallel silent mode
 make apple-frenkel         # Parallel Frenkel analysis
 make benchmark            # Build both versions for comparison

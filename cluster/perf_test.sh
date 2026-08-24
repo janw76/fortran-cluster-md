@@ -15,7 +15,9 @@ echo "  Performance cores: $(sysctl -n hw.perflevel0.logicalcpu 2>/dev/null || e
 echo ""
 
 # Set up environment
-source ./setup_apple_silicon.sh > /dev/null 2>&1
+export OMP_NUM_THREADS=$(sysctl -n hw.perflevel0.logicalcpu 2>/dev/null || sysctl -n hw.logicalcpu)
+export OMP_PROC_BIND=true
+export OMP_PLACES=cores
 
 # Create test input files with different sizes
 create_test_inputs() {
@@ -181,7 +183,7 @@ thread_scaling_test() {
     done
     
     # Restore optimal thread count
-    source ./setup_apple_silicon.sh > /dev/null 2>&1
+    export OMP_NUM_THREADS=$(sysctl -n hw.perflevel0.logicalcpu 2>/dev/null || sysctl -n hw.logicalcpu)
     echo ""
 }
 
