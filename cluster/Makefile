@@ -349,7 +349,7 @@ bigcl:		bdir $(BIGCL__OBJ)
 		$(FF) $(FLAGS) $(BIGCL__OBJ) -o $(HOME)/bin/bigcl
 
 bigclp:		bdir $(BIGCLP_OBJ)
-		$(FF) $(FLAGS) $(BIGCL__OBJ) -o $(HOME)/bin/bigcl
+		$(FF) $(FLAGS) $(BIGCLP_OBJ) -o $(HOME)/bin/bigcl
 
 focusclp:	bdir $(FOCUSCLP_O)
 		$(FF) $(FLAGS) $(FOCUSCLP_O) -o $(HOME)/bin/focusclp
