@@ -17,7 +17,8 @@
 	include 'energ.inc'
 	include 'boxpp.inc'
 
-	integer i,j,k,ij,tid
+	integer i,j,k,ij
+	integer istart(mxa),iend(mxa)
 	double precision atr2,rij2,rij6
 	double precision fij,esum
 	double precision dx,dy,dz,tx,ty,tz
@@ -28,15 +29,11 @@
 	double precision bf1,bf2
 	double precision fsumx(mxa),fsumy(mxa),fsumz(mxa)
 	double precision ibx,iby,ibz,iatm
-	
-	! Thread-local energy accumulator for reduction
-	double precision esum_local
 
 *-------------------------------------------------------------------------------
-* OpenMP parallelization with optimizations for Apple Silicon:
-* - Thread-local accumulators to reduce false sharing
-* - Guided scheduling for load balancing
-* - SIMD hints for auto-vectorization
+* OpenMP parallelization: the force walk is parallelized over atom i (see
+* Pass 1/Pass 2 below); Newton's-third-law updates to fsum*(j) and the
+* i/j collision case are protected with ATOMIC, esum via REDUCTION.
 *-------------------------------------------------------------------------------
 
 	atr2=atrcut*atrcut
@@ -71,25 +68,50 @@
 	enddo
 !$OMP END PARALLEL DO
 
+	! Pass 1 (serial, cheap): walk the packed neighbor list once and record
+	! each atom's segment [istart(i),iend(i)] in atnlist. atnlist is built
+	! with a -i marker for every atom 1..natom (even ones with zero
+	! neighbors), followed by its positive-j neighbor entries; the walk
+	! must stop as soon as the marker for atom natom is reached without
+	! reading into its (always-empty, possibly stale) segment, exactly as
+	! the original single-threaded walk did. This keeps the neighbor-list
+	! traversal itself serial (it is an inherent pointer-chase, not a valid
+	! OMP worksharing loop) while making the actual force evaluation below
+	! embarrassingly parallel over i.
 	k=1
-	esum_local = 0.0d0
-
-	! Main force calculation loop: sequential pointer-chase over the packed
-	! neighbor list (atnlist). Not a valid OMP worksharing loop (bounds are
-	! data-dependent, k is a shared traversal cursor), so this section runs
-	! single-threaded; only the array-fill loops above/below are OMP-parallel.
-10	do while (k.le.mxnlist)
-	  i=-atnlist(k)
-	  if (i.eq.natom) goto 30
-
+10	i=-atnlist(k)
+	if (i.eq.natom) goto 15
+	k=k+1
+	istart(i)=k
+20	j=atnlist(k)
+	if (j.gt.0) then
 	  k=k+1
+	  goto 20
+	endif
+	iend(i)=k-1
+	goto 10
+15	continue
+
+	! Pass 2 (parallel over i): each thread evaluates the pairs of one
+	! atom i (segment istart(i)..iend(i), all j>i by construction). Forces
+	! obey Newton's third law (fsum*(i) and fsum*(j) both updated per
+	! pair), and different threads can legitimately target the same array
+	! slot: atom i's own accumulation here races with another thread's
+	! j-side update where j equals this i (from a smaller i' processed by
+	! that thread). All six fsum* updates are therefore atomic, applied
+	! pair-by-pair in exactly the same order as the original serial code
+	! (no private per-i batching) so that OMP_NUM_THREADS=1 reproduces the
+	! pre-parallelization floating-point result bit-for-bit; esum uses an
+	! OMP reduction, which for a single thread is likewise an exact-order
+	! accumulation into a zero-initialized accumulator.
+!$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,j,k,tx,ty,tz,dx,dy,dz,rij2,
+!$OMP& rij6,ij,fij) SCHEDULE(STATIC) REDUCTION(+:esum)
+	do i=1,natom-1
 	  tx=x(i)
 	  ty=y(i)
-  	  tz=z(i)
-
-20	  j=atnlist(k)
-	  if (j.gt.0) then
-	    k=k+1
+	  tz=z(i)
+	  do k=istart(i),iend(i)
+	    j=atnlist(k)
 
 	    dx=tx-x(j)
 	    dy=ty-y(j)
@@ -108,18 +130,17 @@
 	      ! Species-specific interactions
 	      if (ij.eq.2) then
 	        fij=eps11*48.0d0*rij2*rij6*(c112*rij6-c113)
-	        esum_local=esum_local+eps11*4.0d0*rij6*(c112*rij6-c111)
+	        esum=esum+eps11*4.0d0*rij6*(c112*rij6-c111)
 	      else if (ij.eq.4) then
 	        fij=eps22*48.0d0*rij2*rij6*(c222*rij6-c223)
-	        esum_local=esum_local+eps22*4.0d0*rij6*(c222*rij6-c221)
+	        esum=esum+eps22*4.0d0*rij6*(c222*rij6-c221)
 	      else if (ij.eq.3) then
 	        fij=eps12*48.0d0*rij2*rij6*(c122*rij6-c123)
-	        esum_local=esum_local+eps12*4.0d0*rij6*(c122*rij6-c121)
+	        esum=esum+eps12*4.0d0*rij6*(c122*rij6-c121)
 	      else
 	        write (*,*) 'Nanu???',i,j
 	      endif
 
-	      ! Atomic force updates with reduction
 !$OMP ATOMIC
 	      fsumx(i)=fsumx(i)+fij*dx
 !$OMP ATOMIC
@@ -133,13 +154,9 @@
 !$OMP ATOMIC
 	      fsumz(j)=fsumz(j)-fij*dz
 	    endif
-	    goto 20
-	  else
-	    goto 10
-	  endif
+	  enddo
 	enddo
-30	continue
-	esum = esum + esum_local
+!$OMP END PARALLEL DO
 
 	epot=esum
 
