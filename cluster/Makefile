@@ -232,34 +232,44 @@ FF=	ifort
 # Apple Silicon compiler (gfortran from Homebrew)
 APPLE_FF= gfortran
 
-cluster:	$(CLUOBJ)
+# Toolchain stamps: wipe objects when switching compilers (gfortran <-> ifort)
+GF_STAMP= .built-with-gfortran
+IF_STAMP= .built-with-ifort
+$(GF_STAMP):
+	rm -f *.o $(IF_STAMP)
+	touch $(GF_STAMP)
+$(IF_STAMP):
+	rm -f *.o $(GF_STAMP)
+	touch $(IF_STAMP)
+
+cluster:	$(IF_STAMP) $(CLUOBJ)
 		$(FF) $(FLAGS) $(CLUOBJ) -o cluster
 
-pbc:		$(PBCOBJ)
+pbc:		$(IF_STAMP) $(PBCOBJ)
 		$(FF) $(FLAGS) $(PBCOBJ) -o cluster
 
-mav:		$(MAVOBJ)
+mav:		$(IF_STAMP) $(MAVOBJ)
 		$(FF) $(FLAGS) $(MAVOBJ) -o cluster
 
-mul:		$(MULOBJ)
+mul:		$(IF_STAMP) $(MULOBJ)
 		$(FF) $(FLAGS) $(MULOBJ) -o cluster-m
 
-nuc:		$(NUC)
+nuc:		$(IF_STAMP) $(NUC)
 		$(FF) $(FLAGS) $(NUC) -o clu-nuc
 
-silent:		$(SILENT)
+silent:		$(IF_STAMP) $(SILENT)
 		$(FF) $(FLAGS) $(SILENT) -o clu-silent
 
-frenkel:	$(FRENKEL)
+frenkel:	$(IF_STAMP) $(FRENKEL)
 		$(FF) $(FLAGS) $(FRENKEL) -o clu-fre
-        
-diffusion:	$(DIFFUSION)
+
+diffusion:	$(IF_STAMP) $(DIFFUSION)
 		$(FF) $(FLAGS) $(DIFFUSION) -o diffusion
-        
-moviefrenkel:	$(MOVIEFRENKEL)
+
+moviefrenkel:	$(IF_STAMP) $(MOVIEFRENKEL)
 		$(FF) $(FLAGS) $(MOVIEFRENKEL) -o clu-fre-mov
 
-nose:		$(NOSE)
+nose:		$(IF_STAMP) $(NOSE)
 		$(FF) $(FLAGS) $(NOSE) -o clu-nose
 
 # Apple Silicon optimized targets
@@ -270,129 +280,139 @@ apple-silent apple-frenkel: FF=$(APPLE_FF)
 apple-silent apple-frenkel: FLAGS=$(APPLE_FLAGS)
 apple-silent apple-frenkel: CPPFLAG=-cpp
 
-apple-silent:	$(APPLE_SILENT)
+# apple-silent/apple-frenkel share .o filenames with the ifort-built targets
+# above (same suffix rule, no per-toolchain obj dir). A stale ifort .o left
+# over from a prior default build would get silently relinked into a
+# gfortran binary (or vice versa). Toolchain stamps guard both directions.
+apple-silent:	$(GF_STAMP) $(APPLE_SILENT)
 		$(APPLE_FF) $(APPLE_FLAGS) $(APPLE_SILENT) -o clu-silent-omp
 
-apple-frenkel:	$(APPLE_FRENKEL)
+apple-frenkel:	$(GF_STAMP) $(APPLE_FRENKEL)
 		$(APPLE_FF) $(APPLE_FLAGS) $(APPLE_FRENKEL) -o clu-fre-omp
 
 # Performance comparison target
-benchmark:	apple-silent silent
+# The stamp rules above handle the toolchain switch in each direction, so a
+# plain sequential sub-make suffices. On a machine without ifort, `silent`
+# fails here same as before this fix -- that's pre-existing.
+benchmark:
+		$(MAKE) apple-silent && $(MAKE) silent
 		@echo "Built both standard and OpenMP versions for performance comparison"
 
-rst:		$(RSTOBJ)
+rst:		$(IF_STAMP) $(RSTOBJ)
 		$(FF) $(FLAGS) $(RSTOBJ) -o clu-rst
 
-test:		$(TSTOBJ)
+test:		$(IF_STAMP) $(TSTOBJ)
 		$(FF) $(FLAGS) $(TSTOBJ) -o clutest
 
-thinyout:	bdir $(THINOUTOBJ)
+thinyout:	$(IF_STAMP) bdir $(THINOUTOBJ)
 		$(FF) $(FLAGS) $(THINOUTOBJ) -o $(HOME)/bin/thinout
 
-selats:		bdir $(SELATS_OBJ)
+selats:		$(IF_STAMP) bdir $(SELATS_OBJ)
 		$(FF) $(FLAGS) $(SELATS_OBJ) -o $(HOME)/bin/selats
 
-selclu:		bdir $(SELCLU_OBJ)
+selclu:		$(IF_STAMP) bdir $(SELCLU_OBJ)
 		$(FF) $(FLAGS) $(SELCLU_OBJ) -o $(HOME)/bin/selclu
 
-selclup:	bdir $(SELCLUPOBJ)
+selclup:	$(IF_STAMP) bdir $(SELCLUPOBJ)
 		$(FF) $(FLAGS) $(SELCLUPOBJ) -o $(HOME)/bin/selclu
 
-sizer:		bdir $(SIZER__OBJ)
+sizer:		$(IF_STAMP) bdir $(SIZER__OBJ)
 		$(FF) $(FLAGS) $(SIZER__OBJ) -o $(HOME)/bin/sizer
 
-mesher:		bdir $(MESHER_OBJ)
+mesher:		$(IF_STAMP) bdir $(MESHER_OBJ)
 		$(FF) $(FLAGS) $(MESHER_OBJ) -o $(HOME)/bin/mesher
 
-veltest:	bdir $(VELTESTOBJ)
+veltest:	$(IF_STAMP) bdir $(VELTESTOBJ)
 		$(FF) $(FLAGS) $(VELTESTOBJ) -o $(HOME)/bin/veltest
 
-pressw:		bdir $(PRESSW_OBJ)
+pressw:		$(IF_STAMP) bdir $(PRESSW_OBJ)
 		$(FF) $(FLAGS) $(PRESSW_OBJ) -o $(HOME)/bin/pressw
 
-marker:		bdir $(MARKER_OBJ)
+marker:		$(IF_STAMP) bdir $(MARKER_OBJ)
 		$(FF) $(FLAGS) $(MARKER_OBJ) -o $(HOME)/bin/marker
 
-press:		bdir $(PRESS__OBJ)
+press:		$(IF_STAMP) bdir $(PRESS__OBJ)
 		$(FF) $(FLAGS) $(PRESS__OBJ) -o $(HOME)/bin/press
 
-density:	bdir $(DENSITYOBJ)
+density:	$(IF_STAMP) bdir $(DENSITYOBJ)
 		$(FF) $(FLAGS) $(DENSITYOBJ) -o $(HOME)/bin/density
 
-densityp:	bdir $(DENSITPOBJ)
+densityp:	$(IF_STAMP) bdir $(DENSITPOBJ)
 		$(FF) $(FLAGS) $(DENSITPOBJ) -o $(HOME)/bin/density
 
-sysdens:	bdir $(SYSDENSOBJ)
+sysdens:	$(IF_STAMP) bdir $(SYSDENSOBJ)
 		$(FF) $(FLAGS) $(SYSDENSOBJ) -o $(HOME)/bin/sysdens
 
-colgas:		bdir $(COLGAS_OBJ)
+colgas:		$(IF_STAMP) bdir $(COLGAS_OBJ)
 		$(FF) $(FLAGS) $(COLGAS_OBJ) -o $(HOME)/bin/colgas
 
-colgasp:	bdir $(COLGASPOBJ)
+colgasp:	$(IF_STAMP) bdir $(COLGASPOBJ)
 		$(FF) $(FLAGS) $(COLGASPOBJ) -o $(HOME)/bin/colgas
 
-rdf:		bdir $(RDF____OBJ)
+rdf:		$(IF_STAMP) bdir $(RDF____OBJ)
 		$(FF) $(FLAGS) $(RDF____OBJ) -o $(HOME)/bin/rdf
 
-timefile:	bdir $(TIMEFILOBJ)
+timefile:	$(IF_STAMP) bdir $(TIMEFILOBJ)
 		$(FF) $(FLAGS) $(TIMEFILOBJ) -o $(HOME)/bin/timefile
 
-makelog:	bdir $(MAKELOGOBJ)
+makelog:	$(IF_STAMP) bdir $(MAKELOGOBJ)
 		$(FF) $(FLAGS) $(MAKELOGOBJ) -o $(HOME)/bin/makelog
 
-bars:		bdir $(BARS___OBJ)
+bars:		$(IF_STAMP) bdir $(BARS___OBJ)
 		$(FF) $(FLAGS) $(BARS___OBJ) -o $(HOME)/bin/bars
 
-reverse:	bdir $(REVERSEOBJ)
+reverse:	$(IF_STAMP) bdir $(REVERSEOBJ)
 		$(FF) $(FLAGS) $(REVERSEOBJ) -o $(HOME)/bin/reverse
 
-rate-xyz:	bdir $(RATEXYZOBJ)
+rate-xyz:	$(IF_STAMP) bdir $(RATEXYZOBJ)
 		$(FF) $(FLAGS) $(RATEXYZOBJ) -o $(HOME)/bin/rate-xyz
 
-stotest:	bdir $(STOTESTOBJ)
+stotest:	$(IF_STAMP) bdir $(STOTESTOBJ)
 		$(FF) $(FLAGS) $(STOTESTOBJ) -o $(HOME)/bin/stotest
 
-ratstat:	bdir $(RATSTATOBJ)
+ratstat:	$(IF_STAMP) bdir $(RATSTATOBJ)
 		$(FF) $(FLAGS) $(RATSTATOBJ) -o $(HOME)/bin/ratstat
 
-ratstatt:	bdir $(RATSTTTOBJ)
+ratstatt:	$(IF_STAMP) bdir $(RATSTTTOBJ)
 		$(FF) $(FLAGS) $(RATSTTTOBJ) -o $(HOME)/bin/ratstat-t
 
-bigcl:		bdir $(BIGCL__OBJ)
+bigcl:		$(IF_STAMP) bdir $(BIGCL__OBJ)
 		$(FF) $(FLAGS) $(BIGCL__OBJ) -o $(HOME)/bin/bigcl
 
-bigclp:		bdir $(BIGCLP_OBJ)
+bigclp:		$(IF_STAMP) bdir $(BIGCLP_OBJ)
 		$(FF) $(FLAGS) $(BIGCLP_OBJ) -o $(HOME)/bin/bigcl
 
-focusclp:	bdir $(FOCUSCLP_O)
+focusclp:	$(IF_STAMP) bdir $(FOCUSCLP_O)
 		$(FF) $(FLAGS) $(FOCUSCLP_O) -o $(HOME)/bin/focusclp
 
-passagetime:	bdir $(PASSAGE)
+passagetime:	$(IF_STAMP) bdir $(PASSAGE)
 		$(FF) $(FLAGS) $(PASSAGE) -o $(HOME)/bin/passage-time
 
-mpt:		bdir $(MPT_OBJ)
+mpt:		$(IF_STAMP) bdir $(MPT_OBJ)
 		$(FF) $(FLAGS) $(MPT_OBJ) -o $(HOME)/bin/mpt
 
-tempavg:	bdir $(TEMPCL)
+tempavg:	$(IF_STAMP) bdir $(TEMPCL)
 		$(FF) $(FLAGS) $(TEMPCL) -o $(HOME)/bin/tempavg
 
-meantemp:	bdir $(MTEMP)
+meantemp:	$(IF_STAMP) bdir $(MTEMP)
 		$(FF) $(FLAGS) $(MTEMP) -o $(HOME)/bin/meantemp
 
-t-hist:		bdir $(THIST)
+t-hist:		$(IF_STAMP) bdir $(THIST)
 		$(FF) $(FLAGS) $(THIST) -o $(HOME)/bin/t-hist
 
-tempavg2:	bdir $(TEMPCL2)
+tempavg2:	$(IF_STAMP) bdir $(TEMPCL2)
 		$(FF) $(FLAGS) $(TEMPCL2) -o $(HOME)/bin/tempavg2
 
-diffusivity:	bdir $(DIFFUS)
+diffusivity:	$(IF_STAMP) bdir $(DIFFUS)
 		$(FF) $(FLAGS) $(DIFFUS) -o $(HOME)/bin/diffusivity
-		
-probability:	bdir $(PROBAB)
+
+probability:	$(IF_STAMP) bdir $(PROBAB)
 		$(FF) $(FLAGS) $(PROBAB) -o $(HOME)/bin/probability-distrib
 
 clean:
-	rm -f *.o
+	rm -f *.o cluster cluster-m clu-nuc clu-silent clu-fre diffusion \
+		clu-fre-mov clu-nose clu-silent-omp clu-fre-omp clu-rst clutest \
+		$(GF_STAMP) $(IF_STAMP)
 
 archive:
 	rm -f archive.tar.gz
@@ -400,13 +420,19 @@ archive:
                              helpers/*
 	gzip archive.tar
 
-bdir:	
+bdir:
 	@if test ! -d $(HOME)/bin ; then \
 	  echo 'Directory '$(HOME)/bin' missing ... creating it!' ; \
 	  mkdir $(HOME)/bin ; \
 	  echo "Don't forget to add it to your PATH-environment variable" ; \
 	  sleep 10 ; \
 	fi
+
+# Stamp ordering relies on serial prereq evaluation; this Makefile was never
+# parallel-safe (-j) to begin with.
+.NOTPARALLEL:
+
+.PHONY: clean bdir benchmark
 
 .f.o:	
 	$(FF) $(FLAGS) -c $<
