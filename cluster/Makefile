@@ -87,6 +87,25 @@ NOSE=		main.o \
         wrt-acc.o wrt-ave.o wrt-csi.o wrt-rst.o wrt-vel.o wrt-xyz-m-vmd.o \
 	chk-nucleation.o
 
+# Apple Silicon optimized targets with OpenMP parallelization
+APPLE_SILENT=	main.o \
+        init-cube1.o kps.o scalev-m.o stoddard-pbc-n-m.o \
+        neighbor-pbc-mav-omp.o resize.o stopdead-m.o rates.o chg-natom.o\
+        for-a-lj-n-pbc-m-omp.o for-w-dummy.o \
+        int-verlet-mav-omp.o \
+        read-3d.o read-rst.o \
+        wrt-acc.o wrt-ave.o wrt-csi.o wrt-rst.o wrt-vel.o wrt-xyz-m-vmd.o wrt-fpt.o \
+	chk-nucleation.o
+
+APPLE_FRENKEL=	main.o \
+        init-cube1.o kps.o scalev-m.o stoddard-pbc-n-m-fre.o \
+        neighbor-pbc-mav-omp.o resize.o stopdead-m.o rates.o chg-natom.o\
+        for-a-lj-n-pbc-m-omp.o for-w-dummy.o \
+        int-verlet-mav-omp.o \
+        read-3d.o read-rst.o \
+        wrt-acc.o wrt-ave.o wrt-csi-fre.o wrt-rst.o wrt-vel.o wrt-xyz-m-vmd.o wrt-fpt.o\
+	chk-nucleation.o
+
 MULOBJ= main.o \
         init-cube1.o kps.o scalev-m.o stoddard-pbc-n-m.o \
         neighbor-pbc-mav.o resize.o stopdead-m.o rates.o chg-natom.o\
@@ -197,8 +216,14 @@ PROBAB=	probability-distrib.o
 # FLAGS= -O3 -malign-double
 # Intel Linux Fortran Compiler
 FLAGS= -O3 -warn -traceback
+# Apple Silicon optimized flags with OpenMP
+APPLE_FLAGS= -O3 -fopenmp -march=native -ffast-math -funroll-loops -ftree-vectorize
+# GPU acceleration flags (experimental)
+GPU_FLAGS= -O3 -fopenmp -foffload=nvptx-none -march=native
 # FF=	f77
 FF=	ifort
+# Apple Silicon compiler (gfortran from Homebrew)
+APPLE_FF= gfortran
 
 cluster:	$(CLUOBJ)
 		$(FF) $(FLAGS) $(CLUOBJ) -o cluster
@@ -232,6 +257,21 @@ moviefrenkel:	$(MOVIEFRENKEL)
 
 nose:		$(NOSE)
 		$(FF) $(FLAGS) $(NOSE) -o clu-nose
+
+# Apple Silicon optimized targets
+apple-silent:	$(APPLE_SILENT)
+		$(APPLE_FF) $(APPLE_FLAGS) $(APPLE_SILENT) -o clu-silent-omp
+
+apple-frenkel:	$(APPLE_FRENKEL)
+		$(APPLE_FF) $(APPLE_FLAGS) $(APPLE_FRENKEL) -o clu-fre-omp
+
+# Experimental GPU acceleration (requires compatible hardware)
+gpu-silent:	$(APPLE_SILENT)
+		$(APPLE_FF) $(GPU_FLAGS) $(APPLE_SILENT) -o clu-silent-gpu
+
+# Performance comparison target
+benchmark:	apple-silent silent
+		@echo "Built both standard and OpenMP versions for performance comparison"
 
 rst:		$(RSTOBJ)
 		$(FF) $(FLAGS) $(RSTOBJ) -o clu-rst

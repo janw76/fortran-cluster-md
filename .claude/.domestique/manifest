@@ -1,0 +1,7 @@
+snapshot_format=1
+platform=claude
+domestique_version=0.1.0
+installed_ref=ea5339d
+installed_at=2026-08-24T19:30:21Z
+script_sha256=unavailable
+files=.claude/agents/implementer.md,.claude/agents/reviewer.md,.claude/commands/decompose.md,.claude/commands/goal.md,CLAUDE.md
