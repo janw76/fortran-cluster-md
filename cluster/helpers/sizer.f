@@ -98,7 +98,7 @@
 	    cd=cd+ocg
 	    nts=nts+1
 	    if (ocg.eq.atsum) then
-	      write (2,10) ts,ocg,otc,atsum-ocg,0,real(cd)/nts,oavgcgs
+	      write (2,10) ts,ocg,otc,atsum-ocg,0.0,real(cd)/nts,oavgcgs
 	    else
 	      write (2,10) ts,ocg,otc,atsum-ocg,
      $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
@@ -153,7 +153,7 @@
 	    cd=cd+ocg
 	    nts=nts+1
 	    if (ocg.eq.atsum) Then
-	      write (2,10) ts,ocg,otc,atsum-ocg,0,real(cd)/nts,oavgcgs
+	      write (2,10) ts,ocg,otc,atsum-ocg,0.0,real(cd)/nts,oavgcgs
 	    else
 	      write (2,10) ts,ocg,otc,atsum-ocg,
      $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
@@ -204,7 +204,7 @@
 	   cd=cd+ocg
 	   nts=nts+1
 	   if (ocg.eq.atsum) then
-	     write (2,10) ts,ocg,otc,atsum-ocg,0,real(cd)/nts,oavgcgs
+	     write (2,10) ts,ocg,otc,atsum-ocg,0.0,real(cd)/nts,oavgcgs
 	   else
 	     write (2,10) ts,ocg,otc,atsum-ocg,
      $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
