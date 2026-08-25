@@ -12,7 +12,7 @@
 	implicit none
 
 	integer i,ts,atsum,cg,cn,cd,ocn,ocg,ios,warmup
-	integer nmax,flag
+	integer nmax,flag,nts
 	character*40 fout,fpn,dummy
 	character*80 readln
 	double precision tc,ek,eks,oek,otc
@@ -51,8 +51,9 @@
 	enddo
 	
 	flag = -1
-	
+
 	cd = 0
+	nts = 0
 10	format (I9,2X,2(2X,I6,2X,F7.2),2X,F10.3,F7.3)
 
 *** SWITCH = 1
@@ -85,20 +86,22 @@
 	    oek=ek
 	    otc=tc
 	    
-	    if (flag.ne.1) Then 
+	    if (flag.ne.1) Then
 	      if (cg.ge.nmax) flag = 1
-	      if (ts.ge.warmup) count(cg) = count(cg) + cn
-	    endif	    
-	    
+	      if (ts.ge.warmup .and. cg.ge.0 .and. cg.le.mxa)
+     $          count(cg) = count(cg) + cn
+	    endif
+
 	    goto 21
 	else
 	    eks=eks-oek*ocn*ocg
 	    cd=cd+ocg
+	    nts=nts+1
 	    if (ocg.eq.atsum) then
-	      write (2,10) ts,ocg,otc,atsum-ocg,0,real(cd)/i,oavgcgs	      
+	      write (2,10) ts,ocg,otc,atsum-ocg,0,real(cd)/nts,oavgcgs
 	    else
 	      write (2,10) ts,ocg,otc,atsum-ocg,
-     $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/i,oavgcgs
+     $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
 	    endif
 	endif
 
@@ -138,20 +141,22 @@
 	    oek=ek
 	    otc=tc
 
-	    if (flag.ne.1) Then 
+	    if (flag.ne.1) Then
 	      if (cg.ge.nmax) flag = 1
-	      if (ts.ge.warmup) count(cg) = count(cg) + cn
-	    endif	
-       	    
+	      if (ts.ge.warmup .and. cg.ge.0 .and. cg.le.mxa)
+     $          count(cg) = count(cg) + cn
+	    endif
+
 	    goto 22
 	else
 	    eks=eks-oek*ocn*ocg
 	    cd=cd+ocg
+	    nts=nts+1
 	    if (ocg.eq.atsum) Then
-	      write (2,10) ts,ocg,otc,atsum-ocg,0,real(cd)/i,oavgcgs
+	      write (2,10) ts,ocg,otc,atsum-ocg,0,real(cd)/nts,oavgcgs
 	    else
 	      write (2,10) ts,ocg,otc,atsum-ocg,
-     $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/i,oavgcgs
+     $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
 	    endif
 	endif
 
@@ -182,9 +187,10 @@
 	
 	
 	if (cn.ne.0) then
-	   if (flag.ne.1) Then 
+	   if (flag.ne.1) Then
 	     if (cg.ge.nmax) flag = 1
-	     if (ts.ge.500000) count(cg) = count(cg) + cn
+	     if (ts.ge.500000 .and. cg.ge.0 .and. cg.le.mxa)
+     $         count(cg) = count(cg) + cn
 	   endif
 	   atsum=atsum+cn*cg
 	   eks=eks+ek*cn*cg
@@ -192,15 +198,16 @@
 	   ocg=cg
 	   oek=ek
 	   otc=tc
-	   goto 23 
+	   goto 23
 	else
 	   eks=eks-oek*ocn*ocg
 	   cd=cd+ocg
+	   nts=nts+1
 	   if (ocg.eq.atsum) then
-	     write (2,10) ts,ocg,otc,atsum-ocg,0,real(cd)/i,oavgcgs
+	     write (2,10) ts,ocg,otc,atsum-ocg,0,real(cd)/nts,oavgcgs
 	   else
 	     write (2,10) ts,ocg,otc,atsum-ocg,
-     $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/i,oavgcgs
+     $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
 	    endif
 	endif
 	
@@ -215,9 +222,9 @@
 
 30	continue
 
-	if (ios.ne.0) then	
+	if (ios.ne.0 .and. nts.gt.0) then
 	write (2,10) ts,ocg,otc,atsum-ocg,
-     $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/i,oavgcgs
+     $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
 	endif
 
 	do i = 0,min(nmax,mxa)
