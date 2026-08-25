@@ -475,7 +475,7 @@ init-2cubes.o:	init-2cubes.f \
 init-2atom.o:	init-2atom.f \
 		const.inc atomp.inc atomc.inc boxpp.inc energ.inc
 
-init-ball1.o:	init-cube1.f \
+init-ball1.o:	init-ball1.f \
 		const.inc atomp.inc atomc.inc boxpp.inc energ.inc
 
 kps.o:		kps.f
