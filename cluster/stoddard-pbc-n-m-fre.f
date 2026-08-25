@@ -23,6 +23,12 @@
 	integer ind, lind, nliqmon
 	integer cvtnt(mxnlist), cvtii(mxa+1)
 	integer cvtn(mxnlist), cvti(mxa+1), cvtl(mxa+1), liqmon(natom)
+* SAVE: -fopenmp implies -frecursive, which would otherwise put these
+* multi-MB arrays (mxnlist=9e6 ints -> ~36MB each for cvtnt/cvtn) on the
+* call stack, overflowing the default 8MB stack on the very first call.
+* Both arrays are fully rebuilt from scratch before being read each call,
+* so static storage via SAVE is safe and preserves identical physics.
+	save cvtnt,cvtii,cvtn,cvti,cvtl
 	double precision dx,dy,dz
 	double precision rij2,rijc2
 	double precision bf1,bf2
