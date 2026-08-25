@@ -125,7 +125,7 @@
 	  ind=int((omct-btl+0.5d0*dts)/dts)
 	if (ind.ge.0.and.ind.le.mts.
      $	   and.omcs.ge.mxal.and.omcs.le.mxau) then
-	  if (dtime.le.lblen) then
+	  if (dtime.ge.0.and.dtime.le.lblen) then
 	    slbstat(omcs,dtime,ind)=slbstat(omcs,dtime,ind)+1
 	    slbstat(omcs,0,ind)=slbstat(omcs,0,ind)+1
 	    if (en.gt.0) then
