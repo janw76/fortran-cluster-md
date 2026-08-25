@@ -220,7 +220,7 @@
      $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/i,oavgcgs
 	endif
 
-	do i = 0,nmax
+	do i = 0,min(nmax,mxa)
 	  if (count(i).ne.0) write (3,'(I5,2X,I12)') i,count(i)  
 	enddo
 	
