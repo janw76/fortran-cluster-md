@@ -103,11 +103,13 @@
 	    stop 1
 	  endif
 	  dtime=step-ostep
-	  grstat(omcs)=grstat(omcs)+dtime
-	  grn(omcs)=grn(omcs)+1
+	  if (dtime.ge.0) then
+	    grstat(omcs)=grstat(omcs)+dtime
+	    grn(omcs)=grn(omcs)+1
+	  endif
 
 	  ind=int((omct-btl+0.5d0*dts)/dts)
-	  if (ind.ge.0.and.ind.le.mts) then
+	  if (ind.ge.0.and.ind.le.mts.and.dtime.ge.0) then
 	    grtstat(omcs,ind)=grtstat(omcs,ind)+dtime
 	    grtn(omcs,ind)=grtn(omcs,ind)+1
 	  endif
