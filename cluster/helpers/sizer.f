@@ -76,10 +76,14 @@
 	  eks=0.0d0
 21	  read(1,'(A)',IOSTAT=ios) readln
 	  if (ios.ne.0) goto 30
-	  read(readln,11) cg,cn,avgcgs,ek,tc
 11      format (2(3X,I7),3X,F7.3,3X,F17.15,3X,F10.5)
-	
-	if (cn.ne.0) then
+
+*** csi blocks never carry a cn=0 record: wrt-csi.f:30 and wrt-csi-fre.f:45
+*** skip zero counts on the csi side.  So cn cannot mark the end of a block
+*** here -- only the next ts header can, and that is written '(I15)'
+*** (15 chars) while every data record is 47 or 63.
+	if (LEN_TRIM(readln).gt.15) then
+	    read(readln,11) cg,cn,avgcgs,ek,tc
 	    flushed = .false.
 	    atsum=atsum+cn*cg
 	    eks=eks+ek*cn*cg
@@ -107,13 +111,7 @@
      $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
 	    endif
 	    flushed = .true.
-*** readln held a genuine data record (not the next ts header) when
-*** cn parsed as 0 -- the real header line is still unread; fetch it
-*** fresh instead of reparsing this stale record buffer as ts.
-	    if (LEN_TRIM(readln).gt.15) then
-	      read(1,'(A)',IOSTAT=ios) readln
-	      if (ios.ne.0) goto 30
-	    endif
+*** readln already holds the next ts header -- no fresh read needed.
 	endif
 
 	goto 31
@@ -200,11 +198,14 @@
 	eks=0.0d0
 23	read(1,'(A)',IOSTAT=ios) readln
 	if (ios.ne.0) goto 30
-	read(readln,13) cg,cn,ek,tc
-13    format (2(3X,I7),3X,F17.15,3X,F10.5)	
-	
-	
-	if (cn.ne.0) then
+13    format (2(3X,I7),3X,F17.15,3X,F10.5)
+
+*** csi blocks never carry a cn=0 record: wrt-csi.f:30 skips zero counts.
+*** So cn cannot mark the end of a block here -- only the next ts header
+*** can, and that is written '(I15)' (15 chars) while every data record
+*** is 47 chars.
+	if (LEN_TRIM(readln).gt.15) then
+	   read(readln,13) cg,cn,ek,tc
 	   flushed = .false.
 	   if (flag.ne.1) Then
 	     if (cg.ge.nmax) flag = 1
@@ -229,13 +230,7 @@
      $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
 	    endif
 	   flushed = .true.
-*** readln held a genuine data record (not the next ts header) when
-*** cn parsed as 0 -- the real header line is still unread; fetch it
-*** fresh instead of reparsing this stale record buffer as ts.
-	   if (LEN_TRIM(readln).gt.15) then
-	     read(1,'(A)',IOSTAT=ios) readln
-	     if (ios.ne.0) goto 30
-	   endif
+*** readln already holds the next ts header -- no fresh read needed.
 	endif
 
 	goto 33
