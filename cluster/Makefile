@@ -121,7 +121,8 @@ TSTOBJ= main.o \
         for-a-lj-n-pbc-m.o for-w-dummy.o \
         int-verlet-mav.o \
         read-3d.o read-rst.o \
-        wrt-acc.o wrt-ave.o wrt-csi.o wrt-rst.o wrt-vel-m-ats1.o wrt-xyz-m-ats1.o
+        wrt-acc.o wrt-ave.o wrt-csi.o wrt-rst.o wrt-vel-m-ats1.o wrt-xyz-m-ats1.o \
+	chk-nucleation.o
 
 RSTOBJ=	main.o \
         init-cube1.o kps.o scalev-m.o stoddard-pbc-n-m.o \
@@ -214,205 +215,217 @@ PROBAB=	probability-distrib.o
 # FLAGS= -xtarget=ultra3 -xarch=v9b
 # Linux / G77 / Intel
 # FLAGS= -O3 -malign-double
-# Intel Linux Fortran Compiler
-FLAGS= -O3 -warn -traceback
+# Intel Linux Fortran Compiler (no longer available on Apple Silicon targets)
+# FLAGS= -O3 -warn -traceback
+# gfortran (Homebrew, Apple Silicon default toolchain). -std=legacy
+# -ffixed-line-length-132: this is fixed-form F77 source with lines >72 cols
+# and legacy extensions; gfortran defaults reject both.
+FLAGS= -O3 -std=legacy -ffixed-line-length-132
 # Preprocessor flag for neighbor-pbc-mav.f (SILENT toggle). ifort: -fpp,
-# gfortran: -cpp. The apple-silent/apple-frenkel targets override this to
-# -cpp via target-specific variables below (see apple-silent/apple-frenkel).
-CPPFLAG= -fpp
+# gfortran: -cpp.
+# CPPFLAG= -fpp
+CPPFLAG= -cpp
 # Apple Silicon optimized flags with OpenMP
-# -std=legacy -ffixed-line-length-132: this is fixed-form F77 source with
-# lines >72 cols and legacy extensions; gfortran defaults reject both.
 APPLE_FLAGS= -O3 -fopenmp -march=native -ffast-math -funroll-loops -ftree-vectorize -std=legacy -ffixed-line-length-132
 # Apple Silicon OpenMP runs: export OMP_NUM_THREADS=$(sysctl -n hw.perflevel0.logicalcpu)
 #   export OMP_PROC_BIND=true
 #   export OMP_PLACES=cores
 # FF=	f77
-FF=	ifort
-# Apple Silicon compiler (gfortran from Homebrew)
+# FF=	ifort
+FF=	gfortran
+# Apple Silicon compiler (gfortran from Homebrew) -- same binary as FF now,
+# kept as a separate name for the apple-* recipes below (see APPLE_FLAGS).
 APPLE_FF= gfortran
 
-# Toolchain stamps: wipe objects when switching compilers (gfortran <-> ifort)
-GF_STAMP= .built-with-gfortran
-IF_STAMP= .built-with-ifort
-$(GF_STAMP):
-	rm -f *.o $(IF_STAMP)
-	touch $(GF_STAMP)
-$(IF_STAMP):
-	rm -f *.o $(GF_STAMP)
-	touch $(IF_STAMP)
+# Flag-set stamps: wipe objects when switching between the default FLAGS
+# (-O3, portable) and APPLE_FLAGS (-march=native -ffast-math -fopenmp).
+# Both flag-sets now compile with the same gfortran binary, so mixed-flag
+# objects are ABI-compatible and would link without error -- but a binary
+# linked from a mix of -ffast-math and non-fast-math objects is a silent
+# correctness/perf hazard (inconsistent floating-point assumptions across
+# translation units), so the stamps still guard the .o directory against
+# it. Renamed from the old gfortran/ifort compiler-identity stamps now that
+# there is only one compiler.
+DEFAULT_STAMP= .built-with-default-flags
+APPLE_STAMP= .built-with-apple-flags
+$(DEFAULT_STAMP):
+	rm -f *.o $(APPLE_STAMP)
+	touch $(DEFAULT_STAMP)
+$(APPLE_STAMP):
+	rm -f *.o $(DEFAULT_STAMP)
+	touch $(APPLE_STAMP)
 
-cluster:	$(IF_STAMP) $(CLUOBJ)
+cluster:	$(DEFAULT_STAMP) $(CLUOBJ)
 		$(FF) $(FLAGS) $(CLUOBJ) -o cluster
 
-pbc:		$(IF_STAMP) $(PBCOBJ)
+pbc:		$(DEFAULT_STAMP) $(PBCOBJ)
 		$(FF) $(FLAGS) $(PBCOBJ) -o cluster
 
-mav:		$(IF_STAMP) $(MAVOBJ)
+mav:		$(DEFAULT_STAMP) $(MAVOBJ)
 		$(FF) $(FLAGS) $(MAVOBJ) -o cluster
 
-mul:		$(IF_STAMP) $(MULOBJ)
+mul:		$(DEFAULT_STAMP) $(MULOBJ)
 		$(FF) $(FLAGS) $(MULOBJ) -o cluster-m
 
-nuc:		$(IF_STAMP) $(NUC)
+nuc:		$(DEFAULT_STAMP) $(NUC)
 		$(FF) $(FLAGS) $(NUC) -o clu-nuc
 
-silent:		$(IF_STAMP) $(SILENT)
+silent:		$(DEFAULT_STAMP) $(SILENT)
 		$(FF) $(FLAGS) $(SILENT) -o clu-silent
 
-frenkel:	$(IF_STAMP) $(FRENKEL)
+frenkel:	$(DEFAULT_STAMP) $(FRENKEL)
 		$(FF) $(FLAGS) $(FRENKEL) -o clu-fre
 
-diffusion:	$(IF_STAMP) $(DIFFUSION)
+diffusion:	$(DEFAULT_STAMP) $(DIFFUSION)
 		$(FF) $(FLAGS) $(DIFFUSION) -o diffusion
 
-moviefrenkel:	$(IF_STAMP) $(MOVIEFRENKEL)
+moviefrenkel:	$(DEFAULT_STAMP) $(MOVIEFRENKEL)
 		$(FF) $(FLAGS) $(MOVIEFRENKEL) -o clu-fre-mov
 
-nose:		$(IF_STAMP) $(NOSE)
+nose:		$(DEFAULT_STAMP) $(NOSE)
 		$(FF) $(FLAGS) $(NOSE) -o clu-nose
 
 # Apple Silicon optimized targets
-# Target-specific variable overrides: these propagate to the prerequisite
-# object builds too (GNU make), so apple-silent/apple-frenkel compile AND
-# link entirely with gfortran instead of mixing with the default FF=ifort.
-apple-silent apple-frenkel: FF=$(APPLE_FF)
+# Target-specific variable override: FF is already gfortran by default and
+# CPPFLAG is already -cpp by default, so only FLAGS needs overriding here.
+# This still propagates to the prerequisite object builds too (GNU make),
+# so apple-silent/apple-frenkel compile AND link entirely with APPLE_FLAGS.
 apple-silent apple-frenkel: FLAGS=$(APPLE_FLAGS)
-apple-silent apple-frenkel: CPPFLAG=-cpp
 
-# apple-silent/apple-frenkel share .o filenames with the ifort-built targets
-# above (same suffix rule, no per-toolchain obj dir). A stale ifort .o left
-# over from a prior default build would get silently relinked into a
-# gfortran binary (or vice versa). Toolchain stamps guard both directions.
-apple-silent:	$(GF_STAMP) $(APPLE_SILENT)
+# apple-silent/apple-frenkel share .o filenames with the default-flags
+# targets above (same suffix rule, no per-flagset obj dir). A stale
+# default-flags .o left over from a prior default build would get silently
+# relinked into an APPLE_FLAGS binary (or vice versa), mixing -ffast-math
+# and non-fast-math translation units. The flag-set stamps guard both
+# directions.
+apple-silent:	$(APPLE_STAMP) $(APPLE_SILENT)
 		$(APPLE_FF) $(APPLE_FLAGS) $(APPLE_SILENT) -o clu-silent-omp
 
-apple-frenkel:	$(GF_STAMP) $(APPLE_FRENKEL)
+apple-frenkel:	$(APPLE_STAMP) $(APPLE_FRENKEL)
 		$(APPLE_FF) $(APPLE_FLAGS) $(APPLE_FRENKEL) -o clu-fre-omp
 
 # Performance comparison target
-# The stamp rules above handle the toolchain switch in each direction, so a
-# plain sequential sub-make suffices. On a machine without ifort, `silent`
-# fails here same as before this fix -- that's pre-existing.
+# The flag-set stamp rules above handle the switch in each direction, so a
+# plain sequential sub-make suffices.
 benchmark:
 		$(MAKE) apple-silent && $(MAKE) silent
 		@echo "Built both standard and OpenMP versions for performance comparison"
 
-rst:		$(IF_STAMP) $(RSTOBJ)
+rst:		$(DEFAULT_STAMP) $(RSTOBJ)
 		$(FF) $(FLAGS) $(RSTOBJ) -o clu-rst
 
-test:		$(IF_STAMP) $(TSTOBJ)
+test:		$(DEFAULT_STAMP) $(TSTOBJ)
 		$(FF) $(FLAGS) $(TSTOBJ) -o clutest
 
-thinyout:	$(IF_STAMP) bdir $(THINOUTOBJ)
+thinyout:	$(DEFAULT_STAMP) bdir $(THINOUTOBJ)
 		$(FF) $(FLAGS) $(THINOUTOBJ) -o $(HOME)/bin/thinout
 
-selats:		$(IF_STAMP) bdir $(SELATS_OBJ)
+selats:		$(DEFAULT_STAMP) bdir $(SELATS_OBJ)
 		$(FF) $(FLAGS) $(SELATS_OBJ) -o $(HOME)/bin/selats
 
-selclu:		$(IF_STAMP) bdir $(SELCLU_OBJ)
+selclu:		$(DEFAULT_STAMP) bdir $(SELCLU_OBJ)
 		$(FF) $(FLAGS) $(SELCLU_OBJ) -o $(HOME)/bin/selclu
 
-selclup:	$(IF_STAMP) bdir $(SELCLUPOBJ)
+selclup:	$(DEFAULT_STAMP) bdir $(SELCLUPOBJ)
 		$(FF) $(FLAGS) $(SELCLUPOBJ) -o $(HOME)/bin/selclu
 
-sizer:		$(IF_STAMP) bdir $(SIZER__OBJ)
+sizer:		$(DEFAULT_STAMP) bdir $(SIZER__OBJ)
 		$(FF) $(FLAGS) $(SIZER__OBJ) -o $(HOME)/bin/sizer
 
-mesher:		$(IF_STAMP) bdir $(MESHER_OBJ)
+mesher:		$(DEFAULT_STAMP) bdir $(MESHER_OBJ)
 		$(FF) $(FLAGS) $(MESHER_OBJ) -o $(HOME)/bin/mesher
 
-veltest:	$(IF_STAMP) bdir $(VELTESTOBJ)
+veltest:	$(DEFAULT_STAMP) bdir $(VELTESTOBJ)
 		$(FF) $(FLAGS) $(VELTESTOBJ) -o $(HOME)/bin/veltest
 
-pressw:		$(IF_STAMP) bdir $(PRESSW_OBJ)
+pressw:		$(DEFAULT_STAMP) bdir $(PRESSW_OBJ)
 		$(FF) $(FLAGS) $(PRESSW_OBJ) -o $(HOME)/bin/pressw
 
-marker:		$(IF_STAMP) bdir $(MARKER_OBJ)
+marker:		$(DEFAULT_STAMP) bdir $(MARKER_OBJ)
 		$(FF) $(FLAGS) $(MARKER_OBJ) -o $(HOME)/bin/marker
 
-press:		$(IF_STAMP) bdir $(PRESS__OBJ)
+press:		$(DEFAULT_STAMP) bdir $(PRESS__OBJ)
 		$(FF) $(FLAGS) $(PRESS__OBJ) -o $(HOME)/bin/press
 
-density:	$(IF_STAMP) bdir $(DENSITYOBJ)
+density:	$(DEFAULT_STAMP) bdir $(DENSITYOBJ)
 		$(FF) $(FLAGS) $(DENSITYOBJ) -o $(HOME)/bin/density
 
-densityp:	$(IF_STAMP) bdir $(DENSITPOBJ)
+densityp:	$(DEFAULT_STAMP) bdir $(DENSITPOBJ)
 		$(FF) $(FLAGS) $(DENSITPOBJ) -o $(HOME)/bin/density
 
-sysdens:	$(IF_STAMP) bdir $(SYSDENSOBJ)
+sysdens:	$(DEFAULT_STAMP) bdir $(SYSDENSOBJ)
 		$(FF) $(FLAGS) $(SYSDENSOBJ) -o $(HOME)/bin/sysdens
 
-colgas:		$(IF_STAMP) bdir $(COLGAS_OBJ)
+colgas:		$(DEFAULT_STAMP) bdir $(COLGAS_OBJ)
 		$(FF) $(FLAGS) $(COLGAS_OBJ) -o $(HOME)/bin/colgas
 
-colgasp:	$(IF_STAMP) bdir $(COLGASPOBJ)
+colgasp:	$(DEFAULT_STAMP) bdir $(COLGASPOBJ)
 		$(FF) $(FLAGS) $(COLGASPOBJ) -o $(HOME)/bin/colgas
 
-rdf:		$(IF_STAMP) bdir $(RDF____OBJ)
+rdf:		$(DEFAULT_STAMP) bdir $(RDF____OBJ)
 		$(FF) $(FLAGS) $(RDF____OBJ) -o $(HOME)/bin/rdf
 
-timefile:	$(IF_STAMP) bdir $(TIMEFILOBJ)
+timefile:	$(DEFAULT_STAMP) bdir $(TIMEFILOBJ)
 		$(FF) $(FLAGS) $(TIMEFILOBJ) -o $(HOME)/bin/timefile
 
-makelog:	$(IF_STAMP) bdir $(MAKELOGOBJ)
+makelog:	$(DEFAULT_STAMP) bdir $(MAKELOGOBJ)
 		$(FF) $(FLAGS) $(MAKELOGOBJ) -o $(HOME)/bin/makelog
 
-bars:		$(IF_STAMP) bdir $(BARS___OBJ)
+bars:		$(DEFAULT_STAMP) bdir $(BARS___OBJ)
 		$(FF) $(FLAGS) $(BARS___OBJ) -o $(HOME)/bin/bars
 
-reverse:	$(IF_STAMP) bdir $(REVERSEOBJ)
+reverse:	$(DEFAULT_STAMP) bdir $(REVERSEOBJ)
 		$(FF) $(FLAGS) $(REVERSEOBJ) -o $(HOME)/bin/reverse
 
-rate-xyz:	$(IF_STAMP) bdir $(RATEXYZOBJ)
+rate-xyz:	$(DEFAULT_STAMP) bdir $(RATEXYZOBJ)
 		$(FF) $(FLAGS) $(RATEXYZOBJ) -o $(HOME)/bin/rate-xyz
 
-stotest:	$(IF_STAMP) bdir $(STOTESTOBJ)
+stotest:	$(DEFAULT_STAMP) bdir $(STOTESTOBJ)
 		$(FF) $(FLAGS) $(STOTESTOBJ) -o $(HOME)/bin/stotest
 
-ratstat:	$(IF_STAMP) bdir $(RATSTATOBJ)
+ratstat:	$(DEFAULT_STAMP) bdir $(RATSTATOBJ)
 		$(FF) $(FLAGS) $(RATSTATOBJ) -o $(HOME)/bin/ratstat
 
-ratstatt:	$(IF_STAMP) bdir $(RATSTTTOBJ)
+ratstatt:	$(DEFAULT_STAMP) bdir $(RATSTTTOBJ)
 		$(FF) $(FLAGS) $(RATSTTTOBJ) -o $(HOME)/bin/ratstat-t
 
-bigcl:		$(IF_STAMP) bdir $(BIGCL__OBJ)
+bigcl:		$(DEFAULT_STAMP) bdir $(BIGCL__OBJ)
 		$(FF) $(FLAGS) $(BIGCL__OBJ) -o $(HOME)/bin/bigcl
 
-bigclp:		$(IF_STAMP) bdir $(BIGCLP_OBJ)
+bigclp:		$(DEFAULT_STAMP) bdir $(BIGCLP_OBJ)
 		$(FF) $(FLAGS) $(BIGCLP_OBJ) -o $(HOME)/bin/bigcl
 
-focusclp:	$(IF_STAMP) bdir $(FOCUSCLP_O)
+focusclp:	$(DEFAULT_STAMP) bdir $(FOCUSCLP_O)
 		$(FF) $(FLAGS) $(FOCUSCLP_O) -o $(HOME)/bin/focusclp
 
-passagetime:	$(IF_STAMP) bdir $(PASSAGE)
+passagetime:	$(DEFAULT_STAMP) bdir $(PASSAGE)
 		$(FF) $(FLAGS) $(PASSAGE) -o $(HOME)/bin/passage-time
 
-mpt:		$(IF_STAMP) bdir $(MPT_OBJ)
+mpt:		$(DEFAULT_STAMP) bdir $(MPT_OBJ)
 		$(FF) $(FLAGS) $(MPT_OBJ) -o $(HOME)/bin/mpt
 
-tempavg:	$(IF_STAMP) bdir $(TEMPCL)
+tempavg:	$(DEFAULT_STAMP) bdir $(TEMPCL)
 		$(FF) $(FLAGS) $(TEMPCL) -o $(HOME)/bin/tempavg
 
-meantemp:	$(IF_STAMP) bdir $(MTEMP)
+meantemp:	$(DEFAULT_STAMP) bdir $(MTEMP)
 		$(FF) $(FLAGS) $(MTEMP) -o $(HOME)/bin/meantemp
 
-t-hist:		$(IF_STAMP) bdir $(THIST)
+t-hist:		$(DEFAULT_STAMP) bdir $(THIST)
 		$(FF) $(FLAGS) $(THIST) -o $(HOME)/bin/t-hist
 
-tempavg2:	$(IF_STAMP) bdir $(TEMPCL2)
+tempavg2:	$(DEFAULT_STAMP) bdir $(TEMPCL2)
 		$(FF) $(FLAGS) $(TEMPCL2) -o $(HOME)/bin/tempavg2
 
-diffusivity:	$(IF_STAMP) bdir $(DIFFUS)
+diffusivity:	$(DEFAULT_STAMP) bdir $(DIFFUS)
 		$(FF) $(FLAGS) $(DIFFUS) -o $(HOME)/bin/diffusivity
 
-probability:	$(IF_STAMP) bdir $(PROBAB)
+probability:	$(DEFAULT_STAMP) bdir $(PROBAB)
 		$(FF) $(FLAGS) $(PROBAB) -o $(HOME)/bin/probability-distrib
 
 clean:
 	rm -f *.o cluster cluster-m clu-nuc clu-silent clu-fre diffusion \
 		clu-fre-mov clu-nose clu-silent-omp clu-fre-omp clu-rst clutest \
-		$(GF_STAMP) $(IF_STAMP)
+		$(APPLE_STAMP) $(DEFAULT_STAMP)
 
 archive:
 	rm -f archive.tar.gz
