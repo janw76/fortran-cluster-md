@@ -27,7 +27,7 @@
 	integer, allocatable :: local_neighbors(:,:)
 	integer, allocatable :: local_counts(:)
 	integer max_neighbors_per_atom
-	parameter (max_neighbors_per_atom = 200)
+	parameter (max_neighbors_per_atom = 1024)
 
 *-------------------------------------------------------------------------------
 * Apple Silicon optimizations:
@@ -47,12 +47,21 @@
 	iby=1.0d0/boxy
 	ibz=1.0d0/boxz
 
-	if (bperx.eq.'X'.or.bpery.eq.'X'.or.bperz.eq.'X') then
-	  if (atrskin.gt.min(boxx,boxy,boxz)/2.0d0) then
-	    atrskin=min(boxx/2.0d0,atrskin)
-	    atrskin=min(boxy/2.0d0,atrskin)
-	    atrskin=min(boxz/2.0d0,atrskin)
-	  endif
+	! Serial parity: skin-exceeded fatal check, dmmav bookkeeping and
+	! adaptive atrskin update (ported from neighbor-pbc-mav.f, same
+	! placement relative to ibx/iby/ibz and rs2 so behavior matches).
+	if (dmms.gt.(atrskin-atrcut)) then
+	  write (*,*) '*** FATAL ERROR! ***  Skin radius exceeded!!'
+	  stop
+	endif
+
+	dmmav=real(dmmst)*dmmsu/256.0d0
+
+	if (step.ne.btim.and.step.gt.0) then
+	  atrskin=atrcut+(atrskin-atrcut)*dble(nbtim)/dble(dmmst)
+	  atrskin=min(boxx/2.0d0,atrskin)
+	  atrskin=min(boxy/2.0d0,atrskin)
+	  atrskin=min(boxz/2.0d0,atrskin)
 	endif
 
 	if (step.lt.0) step=-step
@@ -89,8 +98,6 @@
 	  ty=y(i)
 	  tz=z(i)
 	  
-	  ! Vector loop hint for auto-vectorization
-!$OMP SIMD
 	  do j=i+1,natom
 	    dx=tx-x(j)
 	    dy=ty-y(j)
@@ -120,6 +127,12 @@
 	  atnidx(i) = ind
 	  ind = ind + 1
 	  
+	  if (local_counts(i).gt.max_neighbors_per_atom) then
+	    write (*,*) '*** FATAL ERROR *** '//
+     $                  'Per-atom neighbor list is full!'
+	    stop 1
+	  endif
+
 	  do j=1,local_counts(i)
 	    if (ind.lt.mxnlist) then
 	      atnlist(ind) = local_neighbors(j,i)
