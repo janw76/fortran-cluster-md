@@ -70,12 +70,17 @@
 
 	! Initialize neighbor list
 	ind=1
-	
-	! Allocate thread-local storage
-!$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,tx,ty,tz,dx,dy,dz,r2,local_neighbors,local_counts)
+
+	! Allocate shared per-atom scratch storage (each atom i is written
+	! only by the single iteration that owns it, so no race despite the
+	! arrays being shared across threads). Must be allocated/zeroed
+	! single-threaded, before the parallel region, so all threads see
+	! the same storage.
 	allocate(local_neighbors(max_neighbors_per_atom, natom))
 	allocate(local_counts(natom))
 	local_counts = 0
+
+!$OMP PARALLEL DEFAULT(SHARED) PRIVATE(i,j,tx,ty,tz,dx,dy,dz,r2)
 
 	! Parallel neighbor detection with spatial decomposition
 !$OMP DO SCHEDULE(DYNAMIC,32)
@@ -128,9 +133,10 @@
 	enddo
 !$OMP END SINGLE
 
+!$OMP END PARALLEL
+
 	deallocate(local_neighbors)
 	deallocate(local_counts)
-!$OMP END PARALLEL
 
 	! Update displacement tracking
 	dmmax=max(dmms,dmmax)
