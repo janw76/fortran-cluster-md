@@ -4,14 +4,6 @@
 # 50-timestep input and assert exit 0 + at least one finite energy line.
 # bash 3.2 safe (macOS /bin/bash): no associative arrays, no `<<<` here-string
 # reliance beyond what 3.2 already supports.
-#
-# Known exemption: apple-frenkel links stoddard-pbc-n-m-fre.o under -fopenmp
-# (implies -frecursive). That file has a latent stack-overflow bug (bead
-# fortran-cluster-md-inh: unsaved cvtnt/cvtn locals become ~72MB stack frames)
-# which can crash the binary. A crash there is reported as FAIL-known-inh and
-# does NOT flip the overall exit code. Note: ANY apple-frenkel failure is
-# exempted (the check does not distinguish inh crashes from other causes) --
-# tighten this once fortran-cluster-md-inh is fixed.
 #-------------------------------------------------------------------------------
 set -u
 cd "$(dirname "$0")" || exit 1
@@ -25,7 +17,7 @@ moviefrenkel:clu-fre-mov nose:clu-nose rst:clu-rst test:clutest \
 apple-silent:clu-silent-omp apple-frenkel:clu-fre-omp"
 
 WORKDIR=$(mktemp -d)
-trap 'rm -rf "$WORKDIR"; (cd "$(dirname "$0")" && make clean >/dev/null 2>&1)' EXIT
+trap 'rm -rf "$WORKDIR"; make clean >/dev/null 2>&1' EXIT
 
 RESULTS=""
 OVERALL=0
@@ -72,15 +64,8 @@ FAIL  $target"
     status="PASS"
   fi
 
-  if [ "$status" = "FAIL" ] && [ "$target" = "apple-frenkel" ] && ! grep -qF '*** FATAL' "$out"; then
-    status="FAIL-known-inh"
-    reason="$reason (bead fortran-cluster-md-inh: stoddard-fre stack overflow under -fopenmp)"
-  fi
-
   if [ "$status" = "PASS" ]; then
     echo "PASS  $target"
-  elif [ "$status" = "FAIL-known-inh" ]; then
-    echo "SKIP  $target  ($reason)"
   else
     echo "FAIL  $target  ($reason; see $out)"
     OVERALL=1
