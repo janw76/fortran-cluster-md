@@ -18,12 +18,15 @@
 	include 'dmmpp.inc'
 
 	integer step
-	integer i,j,ind
+	integer i,j,ind,istep
 	double precision tx,ty,tz,dx,dy,dz,r2,rs2
 
 *-------------------------------------------------------------------------------
 * step		: timestep number
 *...............................................................................
+* istep		: local |step|; never write to the dummy arg -- callers pass
+*		  literals (init-cube1.f: call neighbor(0)), which live in
+*		  read-only memory (SIGBUS on write)
 * i		: standard loop variable
 * j		: standard loop variable
 * ind		: index for neighborlist
@@ -36,9 +39,14 @@
 	ind=1
 	rs2=atrskin*atrskin
 
-	step=abs(step)
+	istep=abs(step)
 
-	dmmav=dmmsu*dble(nbtim)/dble(step-btim)
+*** no elapsed steps yet -> no average (guard against /0, cf. neighbor-pbc-mav.f)
+	if (istep.gt.btim) then
+	  dmmav=dmmsu*dble(nbtim)/dble(istep-btim)
+	else
+	  dmmav=0.0d0
+	endif
 
 	if (dmms.gt.(atrskin-atrcut)) then
 	  write (*,*) '*** FATAL ERROR! ***  Skin radius exceeded!!'
@@ -81,7 +89,7 @@
 	enddo
 
 	dmmax=max(dmms,dmmax)
-	write (*,10) step,ind-1-natom,dmms,dmmav,dmmax,
+	write (*,10) istep,ind-1-natom,dmms,dmmav,dmmax,
      $	             atrskin-atrcut, atrskin/atr
 	dmms=0.0d0
 	dmmst=0

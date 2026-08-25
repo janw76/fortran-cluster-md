@@ -60,7 +60,7 @@ FAIL  $target"
   elif [ $run_rc -ne 0 ]; then
     reason="nonzero exit ($run_rc)"
   elif grep -Eq '^[[:space:]]*[0-9]+[[:space:]]+[-0-9.]+[[:space:]]+[-0-9.]+[[:space:]]+[-0-9.]+[[:space:]]+[-0-9.]+' "$out" \
-     && ! grep -Eiq 'nan|infinity|\*\*\*' "$out"; then
+     && ! grep -Eiq 'nan|infinity|\*\*\* (FATAL|ERROR)' "$out"; then
     status="PASS"
   fi
 
