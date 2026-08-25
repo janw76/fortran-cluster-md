@@ -16,8 +16,7 @@
 	parameter (copl=6.62618D-34)
 	parameter (cikb=1.38066D-6)
 	parameter (cimu=1.66056D00)
-*	parameter (pi=4.0d0*datan(1.0d0))
-	parameter (pi=3.14159265)
+	parameter (pi=4.0d0*datan(1.0d0))
 
 *-------------------------------------------------------------------------------
 * mxa		: maximum number of atoms handled by the code

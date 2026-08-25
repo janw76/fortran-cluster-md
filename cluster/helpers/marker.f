@@ -11,12 +11,10 @@
 	include 'atomc.inc'
 	include 'timep.inc'
 	include 'filep.inc'
-	include 'boxpp.inc'
 
 	character*40 fout
 	character*2 sym1,sym2
 	integer i,j,step,maxi,nat,ind
-	double precision hx,hy,hz
 
 	i=2
 	call getarg(i,fout)
@@ -26,10 +24,6 @@
 	call getarg(i,sym2)
 
 	call readdata
-
-	hx=boxx/2
-	hy=boxy/2
-	hz=boxz/2
 
 	open (1,file=fxyz)
 	open (2,file=fout)

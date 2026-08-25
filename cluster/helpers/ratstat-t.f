@@ -141,7 +141,7 @@
 999 	continue
 
 	open (2,file='sizes-total.dat')
-	do i=0,mxa
+	do i=1,mxa
 	  write (2,101) i,grstat(i),grn(i)
 	enddo
 	close (2)
@@ -151,7 +151,7 @@
 	  write (fout2,'(A6,I4.4,A4)')
      $		      'sizes-',10*int(dble(io)*dts+btl+.01),'.dat'	
 	  open (2,file=fout2)
-	  do i=0,mxa
+	  do i=1,mxa
 	    write (2,101) i,grtstat(i,io),grtn(i,io)
 	  enddo
 	  close (2)
