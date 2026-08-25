@@ -76,6 +76,7 @@
 	  csif(i)=0
 	  cekf(i)=0
 	  ceksf(i)=0
+	  cvtl(i)=0
 	  cgs(i)=0
 	  cgsf(i)=0
 	  cgsa(i)=0
