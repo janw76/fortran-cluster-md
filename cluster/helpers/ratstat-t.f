@@ -90,7 +90,7 @@
 
 	steps=0
 	read(1,11,iostat=io) ostep,omcs,mcs,mct,omct,cn,en,mcln,omcln
-	if (io.ne.0) stop
+	if (io.ne.0) stop 1
 10	continue
 	  read(1,'(A)',iostat=io) inline
 	  read(inline,11) step,omcs,mcs,mct,omct,cn,en,mcln,omcln

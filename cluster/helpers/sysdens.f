@@ -37,7 +37,7 @@
 	read (dummy,*) divs
 	if (divs.gt.nb) then
 	  write (*,*) 'Only ',nb,' Divisions allowed'
-	  stop
+	  stop 1
 	endif
 
 	call readdata

@@ -32,7 +32,7 @@
 	  write(*,*) 'Too many configurations!'
 	  write(*,*) 'To be read:',maxi
 	  write(*,*) 'Maximum   :',mxs
-	  stop
+	  stop 1
 	endif
 
 	do i=1,mxs
