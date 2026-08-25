@@ -137,10 +137,14 @@
 	  eks=0.0d0
 22	  read(1,'(A)',IOSTAT=ios) readln
 	  if (ios.ne.0) goto 30
-	  read(readln,12) cg,cn,avgcgs,ek,tc
-12      format (2(3X,I7),3X,F7.3,3X,F17.15,3X,F10.5)	
+12      format (2(3X,I7),3X,F7.3,3X,F17.15,3X,F10.5)
 
-	if (cn.ne.0) then
+*** fsi blocks carry a genuine cn=0 record: wrt-csi-fre.f:36-37 writes the
+*** cg=0 monomer line unconditionally, zero count included.  So cn cannot
+*** mark the end of a block here -- only the next ts header can, and that
+*** is written '(I15)' (15 chars) while every data record is 63.
+	if (LEN_TRIM(readln).gt.15) then
+	    read(readln,12) cg,cn,avgcgs,ek,tc
 	    flushed = .false.
 	    if (cg.eq.0) Then
 	      atsum=atsum+cn
@@ -171,13 +175,7 @@
      $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
 	    endif
 	    flushed = .true.
-*** readln held a genuine data record (not the next ts header) when
-*** cn parsed as 0 -- the real header line is still unread; fetch it
-*** fresh instead of reparsing this stale record buffer as ts.
-	    if (LEN_TRIM(readln).gt.15) then
-	      read(1,'(A)',IOSTAT=ios) readln
-	      if (ios.ne.0) goto 30
-	    endif
+*** readln already holds the next ts header -- no fresh read needed.
 	endif
 
 	goto 32
