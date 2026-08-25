@@ -7,7 +7,7 @@
 	integer mxa,mxnlist,mxsorts
 	double precision cokb,cona,comu,copl,cimu,cikb
 	double precision pi
-	parameter (mxa=4096)
+	parameter (mxa=6000)
 	parameter (mxnlist=mxa*mxa/4)
 	parameter (mxsorts=10)
 	parameter (cokb=1.38066D-23)
