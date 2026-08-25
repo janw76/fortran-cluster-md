@@ -12,7 +12,7 @@
 	implicit none
 
 	integer i,ts,atsum,cg,cn,cd,ocn,ocg,ios,warmup
-	integer count(0:4096),nmax,flag
+	integer nmax,flag
 	character*40 fout,fpn,dummy
 	character*80 readln
 	double precision tc,ek,eks,oek,otc
@@ -25,6 +25,8 @@
 	include 'atomp.inc'
 	include 'timep.inc'
 	include 'filep.inc'
+
+	integer count(0:mxa)
 
 	call getarg(1,dummy)
 	if (dummy.eq.'help') call helptext()
@@ -44,9 +46,9 @@
 	open (1,file=fcsi)
 	open (2,file=fout)
 
-	do i = 0,4096
+	do i = 0,mxa
 	   count(i) = 0
-	enddo	  
+	enddo
 	
 	flag = -1
 	
