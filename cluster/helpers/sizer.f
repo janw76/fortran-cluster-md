@@ -17,6 +17,7 @@
 	character*80 readln
 	double precision tc,ek,eks,oek,otc
 	double precision avgcgs,oavgcgs
+	logical flushed
 
 	integer SWITCH
 
@@ -51,6 +52,7 @@
 	enddo
 	
 	flag = -1
+	flushed = .true.
 
 	cd = 0
 	nts = 0
@@ -78,6 +80,7 @@
 11      format (2(3X,I7),3X,F7.3,3X,F17.15,3X,F10.5)
 	
 	if (cn.ne.0) then
+	    flushed = .false.
 	    atsum=atsum+cn*cg
 	    eks=eks+ek*cn*cg
 	    ocn=cn
@@ -85,7 +88,7 @@
 	    oavgcgs = avgcgs
 	    oek=ek
 	    otc=tc
-	    
+
 	    if (flag.ne.1) Then
 	      if (cg.ge.nmax) flag = 1
 	      if (ts.ge.warmup .and. cg.ge.0 .and. cg.le.mxa)
@@ -102,6 +105,14 @@
 	    else
 	      write (2,10) ts,ocg,otc,atsum-ocg,
      $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
+	    endif
+	    flushed = .true.
+*** readln held a genuine data record (not the next ts header) when
+*** cn parsed as 0 -- the real header line is still unread; fetch it
+*** fresh instead of reparsing this stale record buffer as ts.
+	    if (LEN_TRIM(readln).gt.15) then
+	      read(1,'(A)',IOSTAT=ios) readln
+	      if (ios.ne.0) goto 30
 	    endif
 	endif
 
@@ -129,7 +140,8 @@
 	  read(readln,12) cg,cn,avgcgs,ek,tc
 12      format (2(3X,I7),3X,F7.3,3X,F17.15,3X,F10.5)	
 
-	if (cn.ne.0) then  		
+	if (cn.ne.0) then
+	    flushed = .false.
 	    if (cg.eq.0) Then
 	      atsum=atsum+cn
 	    endif
@@ -157,6 +169,14 @@
 	    else
 	      write (2,10) ts,ocg,otc,atsum-ocg,
      $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
+	    endif
+	    flushed = .true.
+*** readln held a genuine data record (not the next ts header) when
+*** cn parsed as 0 -- the real header line is still unread; fetch it
+*** fresh instead of reparsing this stale record buffer as ts.
+	    if (LEN_TRIM(readln).gt.15) then
+	      read(1,'(A)',IOSTAT=ios) readln
+	      if (ios.ne.0) goto 30
 	    endif
 	endif
 
@@ -187,6 +207,7 @@
 	
 	
 	if (cn.ne.0) then
+	   flushed = .false.
 	   if (flag.ne.1) Then
 	     if (cg.ge.nmax) flag = 1
 	     if (ts.ge.500000 .and. cg.ge.0 .and. cg.le.mxa)
@@ -209,8 +230,16 @@
 	     write (2,10) ts,ocg,otc,atsum-ocg,
      $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
 	    endif
+	   flushed = .true.
+*** readln held a genuine data record (not the next ts header) when
+*** cn parsed as 0 -- the real header line is still unread; fetch it
+*** fresh instead of reparsing this stale record buffer as ts.
+	   if (LEN_TRIM(readln).gt.15) then
+	     read(1,'(A)',IOSTAT=ios) readln
+	     if (ios.ne.0) goto 30
+	   endif
 	endif
-	
+
 	goto 33
 
 	ELSE
@@ -222,7 +251,7 @@
 
 30	continue
 
-	if (ios.ne.0 .and. nts.gt.0) then
+	if (ios.ne.0 .and. nts.gt.0 .and. .not.flushed) then
 	write (2,10) ts,ocg,otc,atsum-ocg,
      $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
 	endif
