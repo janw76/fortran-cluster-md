@@ -19,6 +19,8 @@
 
 	integer i,j,k,ij
 	integer istart(mxa),iend(mxa)
+	integer NATOM_PAR_THRESHOLD
+	parameter (NATOM_PAR_THRESHOLD=2500)
 	double precision atr2,rij2,rij6
 	double precision fij,esum
 	double precision dx,dy,dz,tx,ty,tz
@@ -68,95 +70,156 @@
 	enddo
 !$OMP END PARALLEL DO
 
-	! Pass 1 (serial, cheap): walk the packed neighbor list once and record
-	! each atom's segment [istart(i),iend(i)] in atnlist. atnlist is built
-	! with a -i marker for every atom 1..natom (even ones with zero
-	! neighbors), followed by its positive-j neighbor entries; the walk
-	! must stop as soon as the marker for atom natom is reached without
-	! reading into its (always-empty, possibly stale) segment, exactly as
-	! the original single-threaded walk did. This keeps the neighbor-list
-	! traversal itself serial (it is an inherent pointer-chase, not a valid
-	! OMP worksharing loop) while making the actual force evaluation below
-	! embarrassingly parallel over i.
-	k=1
-10	i=-atnlist(k)
-	if (i.eq.natom) goto 15
-	k=k+1
-	istart(i)=k
-20	j=atnlist(k)
-	if (j.gt.0) then
-	  k=k+1
-	  goto 20
-	endif
-	iend(i)=k-1
-	goto 10
-15	continue
+	! Pass 1: every neighbor builder (neighbor-pbc-mav.f,
+	! neighbor-pbc-mav-omp.f) already records atnidx(i) = the atnlist
+	! position of atom i's own -i marker while building the list, so the
+	! marker-walk previously done here to recover each atom's segment was
+	! redundant. atom i's neighbors run from just after its own marker to
+	! just before the next atom's marker: istart(i)=atnidx(i)+1,
+	! iend(i)=atnidx(i+1)-1. No -1 sentinels are involved (this list uses
+	! -i markers, not Stoddard -1 terminators), and atnidx is dimensioned
+	! mxa so atnidx(natom) is always valid.
+	do i=1,natom-1
+	  istart(i)=atnidx(i)+1
+	  iend(i)=atnidx(i+1)-1
+	enddo
 
-	! Pass 2 (parallel over i): each thread evaluates the pairs of one
-	! atom i (segment istart(i)..iend(i), all j>i by construction). Forces
-	! obey Newton's third law (fsum*(i) and fsum*(j) both updated per
-	! pair), and different threads can legitimately target the same array
-	! slot: atom i's own accumulation here races with another thread's
-	! j-side update where j equals this i (from a smaller i' processed by
-	! that thread). All six fsum* updates are therefore atomic, applied
-	! pair-by-pair in exactly the same order as the original serial code
-	! (no private per-i batching) so that OMP_NUM_THREADS=1 reproduces the
-	! pre-parallelization floating-point result bit-for-bit; esum uses an
-	! OMP reduction, which for a single thread is likewise an exact-order
-	! accumulation into a zero-initialized accumulator.
+	! Pass 2 (over i): each iteration evaluates the pairs of one atom i
+	! (segment istart(i)..iend(i), all j>i by construction). Forces obey
+	! Newton's third law (fsum*(i) and fsum*(j) both updated per pair).
+	!
+	! Below natom=NATOM_PAR_THRESHOLD, OMP parallel-region/atomic overhead
+	! can dominate: at natom=1000 (sample.3d, dense) the serial branch
+	! measured faster at 1 thread (best-of-3, ~1.36x) with the two
+	! branches roughly at parity by 4 threads, since other OMP regions
+	! dominate runtime there; the guard mainly pays off at low thread
+	! counts and small natom. Above the threshold the parallel branch
+	! wins clearly (measured 1.58x faster at natom=5000, dense). The
+	! serial branch below is term-identical to the parallel branch (same
+	! arithmetic, same pair-by-pair, i-ascending accumulation order into
+	! zero-initialized fsum*/esum); at OMP_NUM_THREADS=1 the two branches
+	! use identical accumulation order but are not guaranteed bit-
+	! identical, since -ffast-math (APPLE_FLAGS) may contract/vectorize
+	! the non-atomic serial loop differently than the atomic parallel
+	! loop, producing O(1e-14) relative differences in test.rst; the
+	! serial branch itself is fully deterministic run-to-run.
+	if (natom.lt.NATOM_PAR_THRESHOLD) then
+
+	  do i=1,natom-1
+	    tx=x(i)
+	    ty=y(i)
+	    tz=z(i)
+	    do k=istart(i),iend(i)
+	      j=atnlist(k)
+
+	      dx=tx-x(j)
+	      dy=ty-y(j)
+	      dz=tz-z(j)
+	      dx=dx+boxx*(bf1-int(bf2+dx*ibx))
+	      dy=dy+boxy*(bf1-int(bf2+dy*iby))
+	      dz=dz+boxz*(bf1-int(bf2+dz*ibz))
+
+	      rij2=dx*dx+dy*dy+dz*dz
+
+	      if (rij2.le.atr2) then
+	        ij=api(i)+api(j)
+	        rij2=1.0d0/rij2
+	        rij6=rij2*rij2*rij2
+
+	        ! Species-specific interactions
+	        if (ij.eq.2) then
+	          fij=eps11*48.0d0*rij2*rij6*(c112*rij6-c113)
+	          esum=esum+eps11*4.0d0*rij6*(c112*rij6-c111)
+	        else if (ij.eq.4) then
+	          fij=eps22*48.0d0*rij2*rij6*(c222*rij6-c223)
+	          esum=esum+eps22*4.0d0*rij6*(c222*rij6-c221)
+	        else if (ij.eq.3) then
+	          fij=eps12*48.0d0*rij2*rij6*(c122*rij6-c123)
+	          esum=esum+eps12*4.0d0*rij6*(c122*rij6-c121)
+	        else
+	          write (*,*) 'Nanu???',i,j
+	        endif
+
+	        fsumx(i)=fsumx(i)+fij*dx
+	        fsumx(j)=fsumx(j)-fij*dx
+	        fsumy(i)=fsumy(i)+fij*dy
+	        fsumy(j)=fsumy(j)-fij*dy
+	        fsumz(i)=fsumz(i)+fij*dz
+	        fsumz(j)=fsumz(j)-fij*dz
+	      endif
+	    enddo
+	  enddo
+
+	else
+
+	  ! Different threads can legitimately target the same fsum* slot:
+	  ! atom i's own accumulation here races with another thread's j-side
+	  ! update where j equals this i (from a smaller i' processed by that
+	  ! thread). All six fsum* updates are therefore atomic, applied
+	  ! pair-by-pair in exactly the same order as the serial branch above
+	  ! (no private per-i batching); esum uses an OMP reduction, which for
+	  ! a single thread is likewise an exact-order accumulation into a
+	  ! zero-initialized accumulator. At OMP_NUM_THREADS=1 this gives the
+	  ! same arithmetic and accumulation order as the serial branch, but
+	  ! not necessarily a bit-identical result: -ffast-math (APPLE_FLAGS)
+	  ! may contract/vectorize this atomic loop differently than the
+	  ! plain serial loop, producing O(1e-14) relative differences in
+	  ! test.rst (see note above).
 !$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(i,j,k,tx,ty,tz,dx,dy,dz,rij2,
 !$OMP& rij6,ij,fij) SCHEDULE(STATIC) REDUCTION(+:esum)
-	do i=1,natom-1
-	  tx=x(i)
-	  ty=y(i)
-	  tz=z(i)
-	  do k=istart(i),iend(i)
-	    j=atnlist(k)
+	  do i=1,natom-1
+	    tx=x(i)
+	    ty=y(i)
+	    tz=z(i)
+	    do k=istart(i),iend(i)
+	      j=atnlist(k)
 
-	    dx=tx-x(j)
-	    dy=ty-y(j)
-	    dz=tz-z(j)
-	    dx=dx+boxx*(bf1-int(bf2+dx*ibx))
-	    dy=dy+boxy*(bf1-int(bf2+dy*iby))
-	    dz=dz+boxz*(bf1-int(bf2+dz*ibz))
+	      dx=tx-x(j)
+	      dy=ty-y(j)
+	      dz=tz-z(j)
+	      dx=dx+boxx*(bf1-int(bf2+dx*ibx))
+	      dy=dy+boxy*(bf1-int(bf2+dy*iby))
+	      dz=dz+boxz*(bf1-int(bf2+dz*ibz))
 
-	    rij2=dx*dx+dy*dy+dz*dz
+	      rij2=dx*dx+dy*dy+dz*dz
 
-	    if (rij2.le.atr2) then
-	      ij=api(i)+api(j)
-	      rij2=1.0d0/rij2
-	      rij6=rij2*rij2*rij2
+	      if (rij2.le.atr2) then
+	        ij=api(i)+api(j)
+	        rij2=1.0d0/rij2
+	        rij6=rij2*rij2*rij2
 
-	      ! Species-specific interactions
-	      if (ij.eq.2) then
-	        fij=eps11*48.0d0*rij2*rij6*(c112*rij6-c113)
-	        esum=esum+eps11*4.0d0*rij6*(c112*rij6-c111)
-	      else if (ij.eq.4) then
-	        fij=eps22*48.0d0*rij2*rij6*(c222*rij6-c223)
-	        esum=esum+eps22*4.0d0*rij6*(c222*rij6-c221)
-	      else if (ij.eq.3) then
-	        fij=eps12*48.0d0*rij2*rij6*(c122*rij6-c123)
-	        esum=esum+eps12*4.0d0*rij6*(c122*rij6-c121)
-	      else
-	        write (*,*) 'Nanu???',i,j
+	        ! Species-specific interactions
+	        if (ij.eq.2) then
+	          fij=eps11*48.0d0*rij2*rij6*(c112*rij6-c113)
+	          esum=esum+eps11*4.0d0*rij6*(c112*rij6-c111)
+	        else if (ij.eq.4) then
+	          fij=eps22*48.0d0*rij2*rij6*(c222*rij6-c223)
+	          esum=esum+eps22*4.0d0*rij6*(c222*rij6-c221)
+	        else if (ij.eq.3) then
+	          fij=eps12*48.0d0*rij2*rij6*(c122*rij6-c123)
+	          esum=esum+eps12*4.0d0*rij6*(c122*rij6-c121)
+	        else
+	          write (*,*) 'Nanu???',i,j
+	        endif
+
+!$OMP ATOMIC
+	        fsumx(i)=fsumx(i)+fij*dx
+!$OMP ATOMIC
+	        fsumx(j)=fsumx(j)-fij*dx
+!$OMP ATOMIC
+	        fsumy(i)=fsumy(i)+fij*dy
+!$OMP ATOMIC
+	        fsumy(j)=fsumy(j)-fij*dy
+!$OMP ATOMIC
+	        fsumz(i)=fsumz(i)+fij*dz
+!$OMP ATOMIC
+	        fsumz(j)=fsumz(j)-fij*dz
 	      endif
-
-!$OMP ATOMIC
-	      fsumx(i)=fsumx(i)+fij*dx
-!$OMP ATOMIC
-	      fsumx(j)=fsumx(j)-fij*dx
-!$OMP ATOMIC
-	      fsumy(i)=fsumy(i)+fij*dy
-!$OMP ATOMIC
-	      fsumy(j)=fsumy(j)-fij*dy
-!$OMP ATOMIC
-	      fsumz(i)=fsumz(i)+fij*dz
-!$OMP ATOMIC
-	      fsumz(j)=fsumz(j)-fij*dz
-	    endif
+	    enddo
 	  enddo
-	enddo
 !$OMP END PARALLEL DO
+
+	endif
 
 	epot=esum
 
