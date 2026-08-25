@@ -23,9 +23,9 @@
 	double precision rij,rstep,irstep
 	integer gr(0:mxst)
 	double precision pofq(0:mxst),dbq(0:mxst)
-	double precision pi
-
-	pi=4.0d0*datan(1.0d0)
+* pi is already declared as a parameter in const.inc; redeclaring and
+* reassigning it here is illegal under gfortran (was silently accepted
+* by older compilers).
 
 	dummy=''
 

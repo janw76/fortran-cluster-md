@@ -149,7 +149,7 @@ VELTESTOBJ=	veltest.o read-3d.o
 
 PRESSW_OBJ=	pressw.o read-3d.o for-w-i9.o wrt-ave.o read-xyz.o
 
-MARKER_OBJ=	marker.o wrt-xyz-m.o read-3d.o read-3d.o
+MARKER_OBJ=	marker.o wrt-xyz-m.o read-3d.o read-xyz.o
 
 PRESS__OBJ=	press.o read-3d.o
 
@@ -237,6 +237,10 @@ FF=	gfortran
 # kept as a separate name for the apple-* recipes below (see APPLE_FLAGS).
 APPLE_FF= gfortran
 
+# Install directory for helper binaries. Override on the command line
+# (e.g. make BINDIR=./bin-test <target>) to avoid touching the real $(HOME)/bin.
+BINDIR?=$(HOME)/bin
+
 # Flag-set stamps: wipe objects when switching between the default FLAGS
 # (-O3, portable) and APPLE_FLAGS (-march=native -ffast-math -fopenmp).
 # Both flag-sets now compile with the same gfortran binary, so mixed-flag
@@ -318,109 +322,109 @@ test:		$(DEFAULT_STAMP) $(TSTOBJ)
 		$(FF) $(FLAGS) $(TSTOBJ) -o clutest
 
 thinyout:	$(DEFAULT_STAMP) bdir $(THINOUTOBJ)
-		$(FF) $(FLAGS) $(THINOUTOBJ) -o $(HOME)/bin/thinout
+		$(FF) $(FLAGS) $(THINOUTOBJ) -o $(BINDIR)/thinout
 
 selats:		$(DEFAULT_STAMP) bdir $(SELATS_OBJ)
-		$(FF) $(FLAGS) $(SELATS_OBJ) -o $(HOME)/bin/selats
+		$(FF) $(FLAGS) $(SELATS_OBJ) -o $(BINDIR)/selats
 
 selclu:		$(DEFAULT_STAMP) bdir $(SELCLU_OBJ)
-		$(FF) $(FLAGS) $(SELCLU_OBJ) -o $(HOME)/bin/selclu
+		$(FF) $(FLAGS) $(SELCLU_OBJ) -o $(BINDIR)/selclu
 
 selclup:	$(DEFAULT_STAMP) bdir $(SELCLUPOBJ)
-		$(FF) $(FLAGS) $(SELCLUPOBJ) -o $(HOME)/bin/selclu
+		$(FF) $(FLAGS) $(SELCLUPOBJ) -o $(BINDIR)/selclu
 
 sizer:		$(DEFAULT_STAMP) bdir $(SIZER__OBJ)
-		$(FF) $(FLAGS) $(SIZER__OBJ) -o $(HOME)/bin/sizer
+		$(FF) $(FLAGS) $(SIZER__OBJ) -o $(BINDIR)/sizer
 
 mesher:		$(DEFAULT_STAMP) bdir $(MESHER_OBJ)
-		$(FF) $(FLAGS) $(MESHER_OBJ) -o $(HOME)/bin/mesher
+		$(FF) $(FLAGS) $(MESHER_OBJ) -o $(BINDIR)/mesher
 
 veltest:	$(DEFAULT_STAMP) bdir $(VELTESTOBJ)
-		$(FF) $(FLAGS) $(VELTESTOBJ) -o $(HOME)/bin/veltest
+		$(FF) $(FLAGS) $(VELTESTOBJ) -o $(BINDIR)/veltest
 
 pressw:		$(DEFAULT_STAMP) bdir $(PRESSW_OBJ)
-		$(FF) $(FLAGS) $(PRESSW_OBJ) -o $(HOME)/bin/pressw
+		$(FF) $(FLAGS) $(PRESSW_OBJ) -o $(BINDIR)/pressw
 
 marker:		$(DEFAULT_STAMP) bdir $(MARKER_OBJ)
-		$(FF) $(FLAGS) $(MARKER_OBJ) -o $(HOME)/bin/marker
+		$(FF) $(FLAGS) $(MARKER_OBJ) -o $(BINDIR)/marker
 
 press:		$(DEFAULT_STAMP) bdir $(PRESS__OBJ)
-		$(FF) $(FLAGS) $(PRESS__OBJ) -o $(HOME)/bin/press
+		$(FF) $(FLAGS) $(PRESS__OBJ) -o $(BINDIR)/press
 
 density:	$(DEFAULT_STAMP) bdir $(DENSITYOBJ)
-		$(FF) $(FLAGS) $(DENSITYOBJ) -o $(HOME)/bin/density
+		$(FF) $(FLAGS) $(DENSITYOBJ) -o $(BINDIR)/density
 
 densityp:	$(DEFAULT_STAMP) bdir $(DENSITPOBJ)
-		$(FF) $(FLAGS) $(DENSITPOBJ) -o $(HOME)/bin/density
+		$(FF) $(FLAGS) $(DENSITPOBJ) -o $(BINDIR)/density
 
 sysdens:	$(DEFAULT_STAMP) bdir $(SYSDENSOBJ)
-		$(FF) $(FLAGS) $(SYSDENSOBJ) -o $(HOME)/bin/sysdens
+		$(FF) $(FLAGS) $(SYSDENSOBJ) -o $(BINDIR)/sysdens
 
 colgas:		$(DEFAULT_STAMP) bdir $(COLGAS_OBJ)
-		$(FF) $(FLAGS) $(COLGAS_OBJ) -o $(HOME)/bin/colgas
+		$(FF) $(FLAGS) $(COLGAS_OBJ) -o $(BINDIR)/colgas
 
 colgasp:	$(DEFAULT_STAMP) bdir $(COLGASPOBJ)
-		$(FF) $(FLAGS) $(COLGASPOBJ) -o $(HOME)/bin/colgas
+		$(FF) $(FLAGS) $(COLGASPOBJ) -o $(BINDIR)/colgas
 
 rdf:		$(DEFAULT_STAMP) bdir $(RDF____OBJ)
-		$(FF) $(FLAGS) $(RDF____OBJ) -o $(HOME)/bin/rdf
+		$(FF) $(FLAGS) $(RDF____OBJ) -o $(BINDIR)/rdf
 
 timefile:	$(DEFAULT_STAMP) bdir $(TIMEFILOBJ)
-		$(FF) $(FLAGS) $(TIMEFILOBJ) -o $(HOME)/bin/timefile
+		$(FF) $(FLAGS) $(TIMEFILOBJ) -o $(BINDIR)/timefile
 
 makelog:	$(DEFAULT_STAMP) bdir $(MAKELOGOBJ)
-		$(FF) $(FLAGS) $(MAKELOGOBJ) -o $(HOME)/bin/makelog
+		$(FF) $(FLAGS) $(MAKELOGOBJ) -o $(BINDIR)/makelog
 
 bars:		$(DEFAULT_STAMP) bdir $(BARS___OBJ)
-		$(FF) $(FLAGS) $(BARS___OBJ) -o $(HOME)/bin/bars
+		$(FF) $(FLAGS) $(BARS___OBJ) -o $(BINDIR)/bars
 
 reverse:	$(DEFAULT_STAMP) bdir $(REVERSEOBJ)
-		$(FF) $(FLAGS) $(REVERSEOBJ) -o $(HOME)/bin/reverse
+		$(FF) $(FLAGS) $(REVERSEOBJ) -o $(BINDIR)/reverse
 
 rate-xyz:	$(DEFAULT_STAMP) bdir $(RATEXYZOBJ)
-		$(FF) $(FLAGS) $(RATEXYZOBJ) -o $(HOME)/bin/rate-xyz
+		$(FF) $(FLAGS) $(RATEXYZOBJ) -o $(BINDIR)/rate-xyz
 
 stotest:	$(DEFAULT_STAMP) bdir $(STOTESTOBJ)
-		$(FF) $(FLAGS) $(STOTESTOBJ) -o $(HOME)/bin/stotest
+		$(FF) $(FLAGS) $(STOTESTOBJ) -o $(BINDIR)/stotest
 
 ratstat:	$(DEFAULT_STAMP) bdir $(RATSTATOBJ)
-		$(FF) $(FLAGS) $(RATSTATOBJ) -o $(HOME)/bin/ratstat
+		$(FF) $(FLAGS) $(RATSTATOBJ) -o $(BINDIR)/ratstat
 
 ratstatt:	$(DEFAULT_STAMP) bdir $(RATSTTTOBJ)
-		$(FF) $(FLAGS) $(RATSTTTOBJ) -o $(HOME)/bin/ratstat-t
+		$(FF) $(FLAGS) $(RATSTTTOBJ) -o $(BINDIR)/ratstat-t
 
 bigcl:		$(DEFAULT_STAMP) bdir $(BIGCL__OBJ)
-		$(FF) $(FLAGS) $(BIGCL__OBJ) -o $(HOME)/bin/bigcl
+		$(FF) $(FLAGS) $(BIGCL__OBJ) -o $(BINDIR)/bigcl
 
 bigclp:		$(DEFAULT_STAMP) bdir $(BIGCLP_OBJ)
-		$(FF) $(FLAGS) $(BIGCLP_OBJ) -o $(HOME)/bin/bigcl
+		$(FF) $(FLAGS) $(BIGCLP_OBJ) -o $(BINDIR)/bigcl
 
 focusclp:	$(DEFAULT_STAMP) bdir $(FOCUSCLP_O)
-		$(FF) $(FLAGS) $(FOCUSCLP_O) -o $(HOME)/bin/focusclp
+		$(FF) $(FLAGS) $(FOCUSCLP_O) -o $(BINDIR)/focusclp
 
 passagetime:	$(DEFAULT_STAMP) bdir $(PASSAGE)
-		$(FF) $(FLAGS) $(PASSAGE) -o $(HOME)/bin/passage-time
+		$(FF) $(FLAGS) $(PASSAGE) -o $(BINDIR)/passage-time
 
 mpt:		$(DEFAULT_STAMP) bdir $(MPT_OBJ)
-		$(FF) $(FLAGS) $(MPT_OBJ) -o $(HOME)/bin/mpt
+		$(FF) $(FLAGS) $(MPT_OBJ) -o $(BINDIR)/mpt
 
 tempavg:	$(DEFAULT_STAMP) bdir $(TEMPCL)
-		$(FF) $(FLAGS) $(TEMPCL) -o $(HOME)/bin/tempavg
+		$(FF) $(FLAGS) $(TEMPCL) -o $(BINDIR)/tempavg
 
 meantemp:	$(DEFAULT_STAMP) bdir $(MTEMP)
-		$(FF) $(FLAGS) $(MTEMP) -o $(HOME)/bin/meantemp
+		$(FF) $(FLAGS) $(MTEMP) -o $(BINDIR)/meantemp
 
 t-hist:		$(DEFAULT_STAMP) bdir $(THIST)
-		$(FF) $(FLAGS) $(THIST) -o $(HOME)/bin/t-hist
+		$(FF) $(FLAGS) $(THIST) -o $(BINDIR)/t-hist
 
 tempavg2:	$(DEFAULT_STAMP) bdir $(TEMPCL2)
-		$(FF) $(FLAGS) $(TEMPCL2) -o $(HOME)/bin/tempavg2
+		$(FF) $(FLAGS) $(TEMPCL2) -o $(BINDIR)/tempavg2
 
 diffusivity:	$(DEFAULT_STAMP) bdir $(DIFFUS)
-		$(FF) $(FLAGS) $(DIFFUS) -o $(HOME)/bin/diffusivity
+		$(FF) $(FLAGS) $(DIFFUS) -o $(BINDIR)/diffusivity
 
 probability:	$(DEFAULT_STAMP) bdir $(PROBAB)
-		$(FF) $(FLAGS) $(PROBAB) -o $(HOME)/bin/probability-distrib
+		$(FF) $(FLAGS) $(PROBAB) -o $(BINDIR)/probability-distrib
 
 clean:
 	rm -f *.o cluster cluster-m clu-nuc clu-silent clu-fre diffusion \
@@ -434,9 +438,9 @@ archive:
 	gzip archive.tar
 
 bdir:
-	@if test ! -d $(HOME)/bin ; then \
-	  echo 'Directory '$(HOME)/bin' missing ... creating it!' ; \
-	  mkdir $(HOME)/bin ; \
+	@if test ! -d $(BINDIR) ; then \
+	  echo 'Directory '$(BINDIR)' missing ... creating it!' ; \
+	  mkdir $(BINDIR) ; \
 	  echo "Don't forget to add it to your PATH-environment variable" ; \
 	  sleep 10 ; \
 	fi
@@ -641,7 +645,7 @@ wrt-xyz2.o:	wrt-xyz2.f \
 
 wrt-xyz3.o:	wrt-xyz3.f \
 		const.inc atomp.inc atomc.inc boxpp.inc cvtpp.inc
-		
+
 wrt-fpt.o:	wrt-fpt.f \
 		const.inc atomp.inc atomc.inc cvtpp.inc timep.inc
 

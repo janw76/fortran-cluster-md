@@ -11,10 +11,12 @@
 	include 'atomc.inc'
 	include 'timep.inc'
 	include 'filep.inc'
+	include 'boxpp.inc'
 
 	character*40 fout
 	character*2 sym1,sym2
 	integer i,j,step,maxi,nat,ind
+	double precision hx,hy,hz
 
 	i=2
 	call getarg(i,fout)
