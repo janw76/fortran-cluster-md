@@ -54,7 +54,7 @@
 	  write (*,*) 'compiled for',mxa,' atoms.'
 	  write (*,'(A,$)') 'Read anyway? (yY, nN): '
 	  read(*,'(A)') in
-	  if (in.ne.'y'.and.in.ne.'Y') stop
+	  if (in.ne.'y'.and.in.ne.'Y') stop 1
 	endif
 	step=btim
 

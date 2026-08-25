@@ -70,7 +70,7 @@
 	  write (*,*) 'ERROR --- Too many atoms requested'
 	  write (*,*) 'Requested:',nat*nat*nat
 	  write (*,*) 'Available:',mxa
-	  stop
+	  stop 1
 	endif
 
 	halfcube = (boxx-1.2*atrcut)/2

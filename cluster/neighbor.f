@@ -47,7 +47,7 @@
 *	  call wrtXYZ(step,42)
 *	  call wrtVEL(step,43)
 *	  call wrtACC(step,44)
-	  stop
+	  stop 1
 	endif
 
 	if (dmmst.eq.nbtim.and.
@@ -76,7 +76,7 @@
 	  if (ind+natom.gt.mxnlist) then
 	    write (*,*) '*** FATAL ERROR! ***  '//
      $		        'Neighborlist is nearly full... stopping'
-	    stop
+	    stop 1
 	  endif
 	enddo
 

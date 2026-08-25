@@ -52,7 +52,7 @@
 	! placement relative to ibx/iby/ibz and rs2 so behavior matches).
 	if (dmms.gt.(atrskin-atrcut)) then
 	  write (*,*) '*** FATAL ERROR! ***  Skin radius exceeded!!'
-	  stop
+	  stop 1
 	endif
 
 	dmmav=real(dmmst)*dmmsu/256.0d0
@@ -140,7 +140,7 @@
 	    else
 	      write (*,*) '*** FATAL ERROR *** '//
      $                    'Neighborlist is nearly full!'
-	      stop
+	      stop 1
 	    endif
 	  enddo
 	enddo

@@ -73,7 +73,7 @@
 	  write (*,*) 'ERROR --- Too many atoms requested'
 	  write (*,*) 'Requested:',natom*natom*natom
 	  write (*,*) 'Available:',mxa
-	  stop
+	  stop 1
 	endif
 	if ((boxx-2.0*atr)/(DBLE(nat)-1.0d0).lt.atr) then 
 	   write (*,*)

@@ -162,7 +162,7 @@
 	       write (*,*) (ABS((vzn(i)-vzo(i))/vzn(i)))
 	      endif
 	   enddo
-	   stop
+	   stop 1
 	endif
 
 10	continue

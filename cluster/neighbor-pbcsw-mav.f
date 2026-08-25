@@ -48,7 +48,7 @@
 
 	if (dmms.gt.(atrskin-atrcut)) then
 	  write (*,*) '*** FATAL ERROR! ***  Skin radius exceeded!!'
-	  stop
+	  stop 1
 	endif
 
 	dmmav=real(dmmst)*dmmsu/256.0d0
@@ -93,7 +93,7 @@
 	  if (ind+natom.gt.mxnlist) then
 	    write (*,*) '*** FATAL ERROR *** '//
      $                  'Neighborlist is nearly full!'
-	    stop
+	    stop 1
 	  endif
 	enddo
 

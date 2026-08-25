@@ -47,7 +47,7 @@
 	call getarg(i,infile)
 	if (infile.eq.dummy) then
 		write(*,*) 'Please supply an input file name!'
-		stop
+		stop 1
 	else
 		write(*,*) 'Reading data from file: ',infile
 	endif
@@ -60,7 +60,7 @@
 		write(*,*) 'Inputfile is unreadable due to age!'
 		write(*,*) 'File version number: ',fver
 		write(*,*) 'Minimum Version    : ',ver
-		stop
+		stop 1
 	endif
 	read (1,'(A)') dummy
 	read (1,'(41X,A)') fpath

@@ -48,8 +48,8 @@
 	if (st.eq.0) then
 	  write (*,*) '--- ERROR --- No pattern #### for'//
      $		      ' sequence number found!'
-	  stop
-	endif	
+	  stop 1
+	endif
 
 	write(num,'(I4.4)') count
 	fxrst(st:st+3)=num
