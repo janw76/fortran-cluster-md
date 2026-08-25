@@ -97,6 +97,11 @@
 	  if (io.ne.0.or.omcln.eq.0) goto 20
 	  steps=steps+1
 11	  format (I12,2(X,I6),2(X,F10.4),2(X,I3),2(X,I6))
+	  if (omcs.lt.1.or.omcs.gt.mxa) then
+	    write (*,*) 'FATAL: omcs out of bounds in ',fin,
+     $		' step=',step,' omcs=',omcs,' valid range 1..',mxa
+	    stop 1
+	  endif
 	  dtime=step-ostep
 	  grstat(omcs)=grstat(omcs)+dtime
 	  grn(omcs)=grn(omcs)+1
