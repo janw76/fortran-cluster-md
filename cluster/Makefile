@@ -461,7 +461,7 @@ bdir:
 
 main.o:		main.f \
 		const.inc atomc.inc filep.inc timep.inc energ.inc boxpp.inc \
-		atomp.inc
+		atomp.inc cvtpp.inc
 
 init-cube1.o:	init-cube1.f \
 		const.inc atomp.inc atomc.inc boxpp.inc energ.inc
@@ -508,7 +508,7 @@ rates.o:	rates.f \
 		const.inc atomp.inc atomc.inc cvtpp.inc
 
 chg-natom.o:	chg-natom.f \
-		const.inc atomp.inc atomc.inc cvtpp.inc
+		const.inc atomp.inc atomc.inc cvtpp.inc boxpp.inc
 
 stoddard.o:	stoddard.f \
 		const.inc atomp.inc atomc.inc cvtpp.inc
@@ -526,7 +526,7 @@ stoddard-pbc-n-m-fre.o:     stoddard-pbc-n-m-fre.f \
                 const.inc atomp.inc atomc.inc cvtpp.inc boxpp.inc
 
 stoddard-pbc-n-m-fre-mov.o:     stoddard-pbc-n-m-fre-mov.f \
-                const.inc atomp.inc atomc.inc cvtpp.inc boxpp.inc
+                const.inc atomp.inc atomc.inc cvtpp.inc boxpp.inc timep.inc
 
 stoddard-dummy.o:	stoddard-dummy.f
 
@@ -534,17 +534,17 @@ neighbor-dummy.o:	neighbor-dummy.f \
 		const.inc dmmpp.inc
 
 neighbor.o:	neighbor.f \
-		const.inc atomp.inc atomc.inc dmmpp.inc
+		const.inc atomp.inc atomc.inc timep.inc dmmpp.inc
 
 neighbor-pbc.o:	neighbor-pbc.f \
-		const.inc atomp.inc atomc.inc boxpp.inc dmmpp.inc
+		const.inc atomp.inc atomc.inc boxpp.inc timep.inc dmmpp.inc
 
 neighbor-pbc-mav.o:	neighbor-pbc-mav.f \
-		const.inc atomp.inc atomc.inc boxpp.inc dmmpp.inc
+		const.inc atomp.inc atomc.inc boxpp.inc timep.inc dmmpp.inc
 		$(FF) $(FLAGS) $(CPPFLAG) -c neighbor-pbc-mav.f
 
 neighbor-pbc-mav-silent.o:	neighbor-pbc-mav.f \
-		const.inc atomp.inc atomc.inc boxpp.inc dmmpp.inc
+		const.inc atomp.inc atomc.inc boxpp.inc timep.inc dmmpp.inc
 		$(FF) $(FLAGS) $(CPPFLAG) -DSILENT -c neighbor-pbc-mav.f -o neighbor-pbc-mav-silent.o
 
 neighbor-pbc-mav-omp.o:	neighbor-pbc-mav-omp.f \
@@ -583,10 +583,10 @@ int-verlet-nh-mav.o:	int-verlet-nh-mav.f \
 
 read-3d.o:	read-3d.f \
 		const.inc filep.inc atomp.inc timep.inc energ.inc boxpp.inc \
-		dmmpp.inc cvtpp.inc
+		dmmpp.inc cvtpp.inc atomc.inc
 
 read-rst.o:	read-rst.f \
-		const.inc atomp.inc atomc.inc filep.inc energ.inc
+		const.inc atomp.inc atomc.inc filep.inc energ.inc timep.inc
 
 read-xyz.o:	read-xyz.f \
 		const.inc atomp.inc atomc.inc boxpp.inc timep.inc
@@ -611,10 +611,10 @@ wrt-csi-fre.o:	wrt-csi-fre.f \
 		const.inc atomp.inc atomc.inc cvtpp.inc
 
 wrt-rst.o:	wrt-rst.f \
-		const.inc atomp.inc energ.inc filep.inc
+		const.inc atomc.inc energ.inc filep.inc
 
 wrt-rst-multi.o:	wrt-rst-multi.f \
-		const.inc atomp.inc energ.inc filep.inc
+		const.inc atomc.inc energ.inc filep.inc
 
 wrt-vel.o:	wrt-vel.f \
 		const.inc atomp.inc atomc.inc 
@@ -641,16 +641,16 @@ wrt-xyz1.o:	wrt-xyz1.f \
 		const.inc atomp.inc atomc.inc boxpp.inc cvtpp.inc
 
 wrt-xyz2.o:	wrt-xyz2.f \
-		const.inc atomp.inc atomc.inc boxpp.inc cvtpp.inc
+		const.inc atomp.inc atomc.inc boxpp.inc cvtpp.inc timep.inc
 
 wrt-xyz3.o:	wrt-xyz3.f \
-		const.inc atomp.inc atomc.inc boxpp.inc cvtpp.inc
+		const.inc atomp.inc atomc.inc boxpp.inc cvtpp.inc timep.inc
 
 wrt-fpt.o:	wrt-fpt.f \
 		const.inc atomp.inc atomc.inc cvtpp.inc timep.inc
 
 chk-nucleation.o:	chk-nucleation.f \
-		const.inc atomp.inc atomc.inc cvtpp.inc timep.inc
+		const.inc atomp.inc cvtpp.inc
 
 #------------------------------------------------------------------------------
 # Dependencies for helper programs
@@ -673,7 +673,7 @@ sizer.o: 	helpers/sizer.f \
 		$(FF) $(FLAGS) -c helpers/sizer.f
 
 mesher.o:	helpers/mesher.f \
-		const.inc atomp.inc atomc.inc timep.inc filep.inc
+		const.inc atomp.inc atomc.inc timep.inc filep.inc cvtpp.inc
 		$(FF) $(FLAGS) -c helpers/mesher.f
 
 veltest.o: 	helpers/veltest.f \
@@ -685,7 +685,7 @@ pressw.o: 	helpers/pressw.f \
 		$(FF) $(FLAGS) -c helpers/pressw.f
 
 marker.o:	helpers/marker.f \
-		const.inc atomp.inc atomc.inc timep.inc filep.inc
+		const.inc atomp.inc atomc.inc timep.inc filep.inc boxpp.inc
 		$(FF) $(FLAGS) -c helpers/marker.f
 
 press.o: 	helpers/press.f \
@@ -703,7 +703,8 @@ densitp.o: 	helpers/densitp.f \
 		$(FF) $(FLAGS) -c helpers/densitp.f
 
 sysdens.o: 	helpers/sysdens.f \
-		const.inc atomp.inc atomc.inc boxpp.inc timep.inc filep.inc
+		const.inc atomp.inc atomc.inc boxpp.inc timep.inc filep.inc \
+		cvtpp.inc
 		$(FF) $(FLAGS) -c helpers/sysdens.f
 
 colgas.o: 	helpers/colgas.f \
@@ -719,7 +720,7 @@ timefile.o:	helpers/timefile.f \
 		$(FF) $(FLAGS) -c helpers/timefile.f
 
 makelog.o:	helpers/makelog.f \
-		const.inc timep.inc filep.inc
+		const.inc timep.inc filep.inc atomp.inc
 		$(FF) $(FLAGS) -c helpers/makelog.f
 
 bars.o:		helpers/bars.f \
@@ -727,7 +728,7 @@ bars.o:		helpers/bars.f \
 		$(FF) $(FLAGS) -c helpers/bars.f
 
 reverse.o:	helpers/reverse.f \
-		const.inc atomp.inc timep.inc filep.inc
+		const.inc atomp.inc atomc.inc timep.inc filep.inc
 		$(FF) $(FLAGS) -c helpers/reverse.f
 
 rate-xyz.o:	helpers/rate-xyz.f \
@@ -735,7 +736,7 @@ rate-xyz.o:	helpers/rate-xyz.f \
 		$(FF) $(FLAGS) -c helpers/rate-xyz.f
 
 stotest.o:	helpers/stotest.f \
-		const.inc atomp.inc timep.inc filep.inc
+		const.inc atomp.inc filep.inc cvtpp.inc
 		$(FF) $(FLAGS) -c helpers/stotest.f
 
 ratstat.o:	helpers/ratstat.f 
