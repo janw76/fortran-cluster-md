@@ -244,9 +244,20 @@
 
 30	continue
 
-	if (ios.ne.0 .and. nts.gt.0 .and. .not.flushed) then
-	write (2,10) ts,ocg,otc,atsum-ocg,
+*** The last block has no following ts header, so EOF is its only
+*** terminator.  Reproduce the in-loop terminator branch verbatim --
+*** same eks correction, same cd/nts accounting, same ocg.eq.atsum guard.
+	if (.not.flushed) then
+	   eks=eks-oek*ocn*ocg
+	   cd=cd+ocg
+	   nts=nts+1
+	   if (ocg.eq.atsum) then
+	     write (2,10) ts,ocg,otc,atsum-ocg,0.0,real(cd)/nts,oavgcgs
+	   else
+	     write (2,10) ts,ocg,otc,atsum-ocg,
      $        eks/((atsum-ocg)*1.5d0*cikb),real(cd)/nts,oavgcgs
+	   endif
+	   flushed = .true.
 	endif
 
 	do i = 0,min(nmax,mxa)
