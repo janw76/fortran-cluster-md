@@ -60,7 +60,7 @@
 
 	if (mod(step,nbtim).eq.0) call neighbor(step)
 
-	if (dmms.gt.0.95d0*(atrskin-atrcut)) then
+	if (dmms.gt.(atrskin-atrcut-2.0d0*dmms/real(dmmst))) then
 	  write (*,*) '*** WARNING! *** Skin Radius nearly exceeded!'//
      $                ' Increasing by 1%'
 	  atrskin=atrskin+(atrskin-atrcut)*0.01d0
