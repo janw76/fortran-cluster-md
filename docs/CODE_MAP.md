@@ -466,7 +466,7 @@ Silent variant: the same file compiled with `-fpp -DSILENT` (object still named 
 #### `kps.f` — Random Number Generator
 **Purpose:** Kirkpatrick-Stoll lagged-Fibonacci generator (250 integers, XOR-based).
 **Subroutines:**
-- `kpsInit(flag)` — Seed from system time (flag=0) or deterministic (flag=1)
+- `kpsInit(flag)` — Seed from system time (flag=0) or deterministic (flag=1); env var `CLUSTER_SEED=<int>` overrides either mode with an explicit seed (coerced positive odd, printed as `RNG seed: ...`)
 - `kpsRND()` → double in [0,1)
 - `kpsINT()` → positive 31-bit integer
 - `kpsINTf()` → full 32-bit integer (may be negative)
