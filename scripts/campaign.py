@@ -47,7 +47,7 @@ def output_subdir(input_path):
     return None
 
 
-def run_replica(index, binary, input_path, campaign_dir, seed, subdir):
+def run_replica(index, binary, input_path, campaign_dir, seed, subdir, threads):
     repdir = os.path.join(campaign_dir, f"rep-{index:03d}")
     os.makedirs(repdir, exist_ok=True)
     if subdir:
@@ -58,7 +58,7 @@ def run_replica(index, binary, input_path, campaign_dir, seed, subdir):
 
     env = dict(os.environ)
     env["CLUSTER_SEED"] = str(seed)
-    env["OMP_NUM_THREADS"] = "1"
+    env["OMP_NUM_THREADS"] = str(threads)
 
     log_path = os.path.join(repdir, "out.log")
     start = time.time()
@@ -99,6 +99,8 @@ def main():
     ap.add_argument("--seed-base", type=int, default=1,
                      help="base seed; replica i uses seed_base + 2*i "
                           "(default: 1)")
+    ap.add_argument("--threads", type=int, default=1,
+                     help="OMP_NUM_THREADS per replica (default: 1)")
     args = ap.parse_args()
 
     binary = os.path.abspath(args.binary)
@@ -121,7 +123,7 @@ def main():
         futures = {
             pool.submit(
                 run_replica, i, binary, input_path, campaign_dir,
-                args.seed_base + 2 * i, subdir,
+                args.seed_base + 2 * i, subdir, args.threads,
             ): i
             for i in range(args.replicas)
         }
@@ -143,6 +145,7 @@ def main():
         "input": input_path,
         "jobs": args.jobs,
         "seed_base": args.seed_base,
+        "threads": args.threads,
         "start": start_ts,
         "end": end_ts,
         "wall_s": wall_s,

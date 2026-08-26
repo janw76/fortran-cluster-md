@@ -72,6 +72,41 @@ FAIL  $target"
   fi
   RESULTS="$RESULTS
 $status  $target"
+
+  # Multi-thread sanity case (bead 0ae.4): re-run apple-silent's own binary
+  # once more with OMP_NUM_THREADS=2 to catch thread-count-dependent
+  # regressions (e.g. the 3zk neighbor-merge bug), using the same PASS/FAIL
+  # predicate as the 1-thread run above.
+  if [ "$target" = "apple-silent" ]; then
+    mt_label="apple-silent (OMP_NUM_THREADS=2)"
+    mt_rundir="$WORKDIR/$target-omp2"
+    mkdir -p "$mt_rundir/data/test"
+    mt_input="$mt_rundir/tiny.3d"
+    cp "$input" "$mt_input"
+    mt_out="$mt_rundir/out.log"
+    ( cd "$mt_rundir" && OMP_NUM_THREADS=2 "$abs_bin" tiny.3d >"$mt_out" 2>&1 )
+    mt_rc=$?
+
+    mt_status="FAIL"
+    mt_reason="no finite energy line"
+    if grep -qF '*** FATAL' "$mt_out"; then
+      mt_reason="FATAL error in output"
+    elif [ $mt_rc -ne 0 ]; then
+      mt_reason="nonzero exit ($mt_rc)"
+    elif grep -Eq '^[[:space:]]*[0-9]+[[:space:]]+[-0-9.]+[[:space:]]+[-0-9.]+[[:space:]]+[-0-9.]+[[:space:]]+[-0-9.]+' "$mt_out" \
+       && ! grep -Eiq 'nan|infinity|\*\*\* (FATAL|ERROR)' "$mt_out"; then
+      mt_status="PASS"
+    fi
+
+    if [ "$mt_status" = "PASS" ]; then
+      echo "PASS  $mt_label"
+    else
+      echo "FAIL  $mt_label  ($mt_reason; see $mt_out)"
+      OVERALL=1
+    fi
+    RESULTS="$RESULTS
+$mt_status  $mt_label"
+  fi
 done
 
 echo
