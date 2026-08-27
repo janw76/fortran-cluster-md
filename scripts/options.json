@@ -1,0 +1,1711 @@
+{
+  "targets": {
+    "cluster": {
+      "kind": "md-binary",
+      "output": "cluster",
+      "objs": [
+        "main.o",
+        "init-cube1.o",
+        "kps.o",
+        "scalev.o",
+        "stoddard.o",
+        "neighbor.o",
+        "resize.o",
+        "stopdead.o",
+        "rates.o",
+        "chg-natom.o",
+        "for-a-lj-n.o",
+        "for-w-i9.o",
+        "int-verlet-dmm.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi.o",
+        "wrt-rst.o",
+        "wrt-vel.o",
+        "wrt-xyz.o",
+        "wrt-fpt.o",
+        "chk-nucleation.o"
+      ],
+      "species": "single",
+      "thermostat": "scalev (isokinetic velocity scaling, single species)",
+      "boundary": "walls (for-w-i9, r^-9 repulsive on all box faces; no PBC)",
+      "integrator": "int-verlet-dmm (Verlet + raw displacement tracking, no moving-average skin adaptation)",
+      "force": "for-a-lj-n (single-species LJ 12-6, cutoff + neighbor list, no PBC)",
+      "neighbor": "neighbor (basic Verlet list, no PBC)",
+      "init": "init-cube1",
+      "stoddard": "stoddard (Stillinger only, no PBC, O(N^2))",
+      "stopdead": "stopdead (single-species)",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi",
+        "wrt-rst",
+        "wrt-vel",
+        "wrt-xyz",
+        "wrt-fpt"
+      ],
+      "notes": "Confined-box, single-species reference build. Output binary name 'cluster' is shared with the pbc and mav targets -- building one after another silently overwrites the previous binary."
+    },
+    "pbc": {
+      "kind": "md-binary",
+      "output": "cluster",
+      "objs": [
+        "main.o",
+        "init-cube1.o",
+        "kps.o",
+        "scalev.o",
+        "stoddard-pbc-n.o",
+        "chg-natom.o",
+        "neighbor-pbc.o",
+        "resize.o",
+        "stopdead-m.o",
+        "rates.o",
+        "for-a-lj-n-pbc.o",
+        "for-w-dummy.o",
+        "int-verlet-dmm.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi.o",
+        "wrt-rst.o",
+        "wrt-vel.o",
+        "wrt-xyz.o",
+        "chk-nucleation.o"
+      ],
+      "species": "single",
+      "thermostat": "scalev (isokinetic velocity scaling, single species)",
+      "boundary": "pbc (for-w-dummy no-op walls; periodicity controlled by bperx/bpery/bperz in the .3d file)",
+      "integrator": "int-verlet-dmm",
+      "force": "for-a-lj-n-pbc (single-species LJ 12-6, cutoff, minimum-image PBC, neighbor list)",
+      "neighbor": "neighbor-pbc (PBC Verlet list, fixed skin, no adaptive rebuild)",
+      "init": "init-cube1",
+      "stoddard": "stoddard-pbc-n (Stillinger, PBC, neighbor-list-optimized)",
+      "stopdead": "stopdead-m (multi-species-capable, even though this target is single-species)",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi",
+        "wrt-rst",
+        "wrt-vel",
+        "wrt-xyz"
+      ],
+      "notes": "No wrt-fpt (no first-passage-time output). Output binary name 'cluster' collides with the cluster and mav targets."
+    },
+    "mav": {
+      "kind": "md-binary",
+      "output": "cluster",
+      "objs": [
+        "main.o",
+        "init-cube1.o",
+        "kps.o",
+        "scalev.o",
+        "stoddard-pbc-n.o",
+        "neighbor-pbc-mav.o",
+        "resize.o",
+        "stopdead.o",
+        "rates.o",
+        "chg-natom.o",
+        "for-a-lj-n-pbc.o",
+        "for-w-dummy.o",
+        "int-verlet-mav.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi.o",
+        "wrt-rst.o",
+        "wrt-vel.o",
+        "wrt-xyz.o",
+        "chk-nucleation.o"
+      ],
+      "species": "single",
+      "thermostat": "scalev",
+      "boundary": "pbc (for-w-dummy)",
+      "integrator": "int-verlet-mav (Verlet + moving-average displacement tracking, adaptive skin radius)",
+      "force": "for-a-lj-n-pbc",
+      "neighbor": "neighbor-pbc-mav (PBC, adaptive skin radius via moving-average displacement; per-step diagnostic printed)",
+      "init": "init-cube1",
+      "stoddard": "stoddard-pbc-n",
+      "stopdead": "stopdead (single-species, unlike pbc target which uses stopdead-m)",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi",
+        "wrt-rst",
+        "wrt-vel",
+        "wrt-xyz"
+      ],
+      "notes": "Output binary name 'cluster' collides with cluster and pbc targets."
+    },
+    "mul": {
+      "kind": "md-binary",
+      "output": "cluster-m",
+      "objs": [
+        "main.o",
+        "init-cube1.o",
+        "kps.o",
+        "scalev-m.o",
+        "stoddard-pbc-n-m.o",
+        "neighbor-pbc-mav.o",
+        "resize.o",
+        "stopdead-m.o",
+        "rates.o",
+        "chg-natom.o",
+        "for-a-lj-n-pbc-m.o",
+        "for-w-dummy.o",
+        "int-verlet-mav.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi.o",
+        "wrt-rst.o",
+        "wrt-vel.o",
+        "wrt-xyz-m.o",
+        "chk-nucleation.o"
+      ],
+      "species": "multi",
+      "thermostat": "scalev-m (per-species isokinetic scaling, apth flag gates which species)",
+      "boundary": "pbc (for-w-dummy)",
+      "integrator": "int-verlet-mav",
+      "force": "for-a-lj-n-pbc-m (multi-species LJ 12-6, cutoff, PBC, neighbor list, 1-1/2-2/1-2 mixing)",
+      "neighbor": "neighbor-pbc-mav",
+      "init": "init-cube1",
+      "stoddard": "stoddard-pbc-n-m (multi-species, Stillinger only, no Frenkel)",
+      "stopdead": "stopdead-m",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi",
+        "wrt-rst",
+        "wrt-vel",
+        "wrt-xyz-m"
+      ],
+      "notes": "wrt-xyz-m (plain multi-species XYZ), not the VMD writer."
+    },
+    "nuc": {
+      "kind": "md-binary",
+      "output": "clu-nuc",
+      "objs": [
+        "main.o",
+        "init-cube1.o",
+        "kps.o",
+        "scalev-m.o",
+        "stoddard-pbc-n-m.o",
+        "neighbor-pbc-mav.o",
+        "resize.o",
+        "stopdead-m.o",
+        "rates.o",
+        "chg-natom.o",
+        "for-a-lj-n-pbc-m.o",
+        "for-w-dummy.o",
+        "int-verlet-mav.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi.o",
+        "wrt-rst.o",
+        "wrt-vel.o",
+        "wrt-xyz-m-vmd.o",
+        "chk-nucleation.o"
+      ],
+      "species": "multi",
+      "thermostat": "scalev-m",
+      "boundary": "pbc (for-w-dummy)",
+      "integrator": "int-verlet-mav",
+      "force": "for-a-lj-n-pbc-m",
+      "neighbor": "neighbor-pbc-mav (diagnostics NOT silenced -- verbose per-step neighbor-list prints)",
+      "init": "init-cube1",
+      "stoddard": "stoddard-pbc-n-m",
+      "stopdead": "stopdead-m",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi",
+        "wrt-rst",
+        "wrt-vel",
+        "wrt-xyz-m-vmd"
+      ],
+      "notes": "Same module composition as 'silent' below except neighbor list is verbose (not -DSILENT) and no wrt-fpt."
+    },
+    "silent": {
+      "kind": "md-binary",
+      "output": "clu-silent",
+      "objs": [
+        "main.o",
+        "init-cube1.o",
+        "kps.o",
+        "scalev-m.o",
+        "stoddard-pbc-n-m.o",
+        "neighbor-pbc-mav-silent.o",
+        "resize.o",
+        "stopdead-m.o",
+        "rates.o",
+        "chg-natom.o",
+        "for-a-lj-n-pbc-m.o",
+        "for-w-dummy.o",
+        "int-verlet-mav.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi.o",
+        "wrt-rst.o",
+        "wrt-vel.o",
+        "wrt-xyz-m-vmd.o",
+        "wrt-fpt.o",
+        "chk-nucleation.o"
+      ],
+      "species": "multi",
+      "thermostat": "scalev-m",
+      "boundary": "pbc (for-w-dummy)",
+      "integrator": "int-verlet-mav",
+      "force": "for-a-lj-n-pbc-m",
+      "neighbor": "neighbor-pbc-mav-silent (same source as neighbor-pbc-mav.f, compiled with -cpp -DSILENT to suppress per-step diagnostic writes; production build)",
+      "init": "init-cube1",
+      "stoddard": "stoddard-pbc-n-m",
+      "stopdead": "stopdead-m",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi",
+        "wrt-rst",
+        "wrt-vel",
+        "wrt-xyz-m-vmd",
+        "wrt-fpt"
+      ],
+      "notes": "Base production build: quiet neighbor list + first-passage-time output."
+    },
+    "frenkel": {
+      "kind": "md-binary",
+      "output": "clu-fre",
+      "objs": [
+        "main.o",
+        "init-cube1.o",
+        "kps.o",
+        "scalev-m.o",
+        "stoddard-pbc-n-m-fre.o",
+        "neighbor-pbc-mav-silent.o",
+        "resize.o",
+        "stopdead-m.o",
+        "rates.o",
+        "chg-natom.o",
+        "for-a-lj-n-pbc-m.o",
+        "for-w-dummy.o",
+        "int-verlet-mav.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi-fre.o",
+        "wrt-rst.o",
+        "wrt-vel.o",
+        "wrt-xyz-m-vmd.o",
+        "wrt-fpt.o",
+        "chk-nucleation.o"
+      ],
+      "species": "multi",
+      "thermostat": "scalev-m",
+      "boundary": "pbc (for-w-dummy)",
+      "integrator": "int-verlet-mav",
+      "force": "for-a-lj-n-pbc-m",
+      "neighbor": "neighbor-pbc-mav-silent",
+      "init": "init-cube1",
+      "stoddard": "stoddard-pbc-n-m-fre (Stillinger + ten Wolde/Frenkel dual cluster criteria)",
+      "stopdead": "stopdead-m",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi-fre",
+        "wrt-rst",
+        "wrt-vel",
+        "wrt-xyz-m-vmd",
+        "wrt-fpt"
+      ],
+      "notes": "Production build documented as the primary path in docs/CODE_MAP.md call graph. wrt-csi-fre writes both Stillinger (.csi) and Frenkel (.fsi) size distributions."
+    },
+    "diffusion": {
+      "kind": "md-binary",
+      "output": "diffusion",
+      "objs": [
+        "main.o",
+        "init-center.o",
+        "kps.o",
+        "scalev-m.o",
+        "stoddard-pbc-n-m-fre.o",
+        "neighbor-pbc-mav-silent.o",
+        "resize.o",
+        "stopdead-m.o",
+        "rates.o",
+        "chg-natom.o",
+        "for-a-lj-n-pbc-m.o",
+        "for-w-dummy.o",
+        "int-verlet-mav.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi-fre.o",
+        "wrt-rst.o",
+        "wrt-vel.o",
+        "wrt-xyz-m-vmd.o",
+        "chk-nucleation.o"
+      ],
+      "species": "multi",
+      "thermostat": "scalev-m",
+      "boundary": "pbc (for-w-dummy)",
+      "integrator": "int-verlet-mav",
+      "force": "for-a-lj-n-pbc-m",
+      "neighbor": "neighbor-pbc-mav-silent",
+      "init": "init-center (starting cluster centered in box, for diffusion studies)",
+      "stoddard": "stoddard-pbc-n-m-fre",
+      "stopdead": "stopdead-m",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi-fre",
+        "wrt-rst",
+        "wrt-vel",
+        "wrt-xyz-m-vmd"
+      ],
+      "notes": "Identical to frenkel except init routine (centered start) and no wrt-fpt."
+    },
+    "moviefrenkel": {
+      "kind": "md-binary",
+      "output": "clu-fre-mov",
+      "objs": [
+        "main.o",
+        "init-cube1.o",
+        "kps.o",
+        "scalev-m.o",
+        "stoddard-pbc-n-m-fre-mov.o",
+        "neighbor-pbc-mav-silent.o",
+        "resize.o",
+        "stopdead-m.o",
+        "rates.o",
+        "chg-natom.o",
+        "for-a-lj-n-pbc-m.o",
+        "for-w-dummy.o",
+        "int-verlet-mav.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi-fre.o",
+        "wrt-rst.o",
+        "wrt-vel.o",
+        "wrt-xyz-m-vmd.o",
+        "chk-nucleation.o"
+      ],
+      "species": "multi",
+      "thermostat": "scalev-m",
+      "boundary": "pbc (for-w-dummy)",
+      "integrator": "int-verlet-mav",
+      "force": "for-a-lj-n-pbc-m",
+      "neighbor": "neighbor-pbc-mav-silent",
+      "init": "init-cube1",
+      "stoddard": "stoddard-pbc-n-m-fre-mov (stoddard-pbc-n-m-fre plus cluster movement tracking for visualization)",
+      "stopdead": "stopdead-m",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi-fre",
+        "wrt-rst",
+        "wrt-vel",
+        "wrt-xyz-m-vmd"
+      ],
+      "notes": "Identical to frenkel except the movement-tracking stoddard variant and no wrt-fpt."
+    },
+    "nose": {
+      "kind": "md-binary",
+      "output": "clu-nose",
+      "objs": [
+        "main.o",
+        "init-cube1.o",
+        "kps.o",
+        "scalev-nh-m.o",
+        "stoddard-pbc-n-m.o",
+        "neighbor-pbc-mav-silent.o",
+        "resize.o",
+        "stopdead-m.o",
+        "rates.o",
+        "chg-natom.o",
+        "for-a-lj-n-pbc-m.o",
+        "for-w-dummy.o",
+        "int-verlet-nh-mav.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi.o",
+        "wrt-rst.o",
+        "wrt-vel.o",
+        "wrt-xyz-m-vmd.o",
+        "chk-nucleation.o"
+      ],
+      "species": "multi (Nose-Hoover integrator itself only supports a single active species per docs/CODE_MAP.md)",
+      "thermostat": "scalev-nh-m (Nose-Hoover coupling; combined with velocity scaling at init)",
+      "boundary": "pbc (for-w-dummy)",
+      "integrator": "int-verlet-nh-mav (Verlet + Nose-Hoover friction terms, iterative velocity/PSI convergence)",
+      "force": "for-a-lj-n-pbc-m",
+      "neighbor": "neighbor-pbc-mav-silent",
+      "init": "init-cube1",
+      "stoddard": "stoddard-pbc-n-m (Stillinger only, no Frenkel)",
+      "stopdead": "stopdead-m",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi",
+        "wrt-rst",
+        "wrt-vel",
+        "wrt-xyz-m-vmd"
+      ],
+      "notes": "Only target using the Nose-Hoover thermostat/integrator pair; requires .3d Q field (v>=1.2)."
+    },
+    "apple-silent": {
+      "kind": "md-binary",
+      "output": "clu-silent-omp",
+      "objs": [
+        "main.o",
+        "init-cube1.o",
+        "kps.o",
+        "scalev-m.o",
+        "stoddard-pbc-n-m.o",
+        "neighbor-pbc-mav-omp.o",
+        "resize.o",
+        "stopdead-m.o",
+        "rates.o",
+        "chg-natom.o",
+        "for-a-lj-n-pbc-m-omp.o",
+        "for-w-dummy.o",
+        "int-verlet-mav-omp.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi.o",
+        "wrt-rst.o",
+        "wrt-vel.o",
+        "wrt-xyz-m-vmd.o",
+        "wrt-fpt.o",
+        "chk-nucleation.o"
+      ],
+      "species": "multi",
+      "thermostat": "scalev-m",
+      "boundary": "pbc (for-w-dummy)",
+      "integrator": "int-verlet-mav-omp (OpenMP-parallel Verlet + moving-average skin adaptation)",
+      "force": "for-a-lj-n-pbc-m-omp (OpenMP-parallel multi-species LJ, PBC, neighbor list)",
+      "neighbor": "neighbor-pbc-mav-omp (OpenMP-parallel PBC adaptive neighbor list)",
+      "init": "init-cube1",
+      "stoddard": "stoddard-pbc-n-m",
+      "stopdead": "stopdead-m",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi",
+        "wrt-rst",
+        "wrt-vel",
+        "wrt-xyz-m-vmd",
+        "wrt-fpt"
+      ],
+      "notes": "Module composition matches 'silent' target 1:1, but every hot-path module (neighbor/force/integrator) is the -omp variant; compiled/linked entirely with APPLE_FLAGS (-fopenmp -march=native -ffast-math -funroll-loops -ftree-vectorize) via a target-specific FLAGS override. Bit-identical to 'silent' only below NATOM_PAR_THRESHOLD=2500 per docs/PERFORMANCE.md."
+    },
+    "apple-frenkel": {
+      "kind": "md-binary",
+      "output": "clu-fre-omp",
+      "objs": [
+        "main.o",
+        "init-cube1.o",
+        "kps.o",
+        "scalev-m.o",
+        "stoddard-pbc-n-m-fre.o",
+        "neighbor-pbc-mav-omp.o",
+        "resize.o",
+        "stopdead-m.o",
+        "rates.o",
+        "chg-natom.o",
+        "for-a-lj-n-pbc-m-omp.o",
+        "for-w-dummy.o",
+        "int-verlet-mav-omp.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi-fre.o",
+        "wrt-rst.o",
+        "wrt-vel.o",
+        "wrt-xyz-m-vmd.o",
+        "wrt-fpt.o",
+        "chk-nucleation.o"
+      ],
+      "species": "multi",
+      "thermostat": "scalev-m",
+      "boundary": "pbc (for-w-dummy)",
+      "integrator": "int-verlet-mav-omp",
+      "force": "for-a-lj-n-pbc-m-omp",
+      "neighbor": "neighbor-pbc-mav-omp",
+      "init": "init-cube1",
+      "stoddard": "stoddard-pbc-n-m-fre",
+      "stopdead": "stopdead-m",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi-fre",
+        "wrt-rst",
+        "wrt-vel",
+        "wrt-xyz-m-vmd",
+        "wrt-fpt"
+      ],
+      "notes": "Module composition matches 'frenkel' target 1:1 with OMP hot-path modules; APPLE_FLAGS applied via target-specific FLAGS override, same as apple-silent."
+    },
+    "rst": {
+      "kind": "md-binary",
+      "output": "clu-rst",
+      "objs": [
+        "main.o",
+        "init-cube1.o",
+        "kps.o",
+        "scalev-m.o",
+        "stoddard-pbc-n-m.o",
+        "neighbor-pbc-mav-silent.o",
+        "resize.o",
+        "stopdead-m.o",
+        "rates.o",
+        "chg-natom.o",
+        "for-a-lj-n-pbc-m.o",
+        "for-w-dummy.o",
+        "int-verlet-mav.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi.o",
+        "wrt-rst-multi.o",
+        "wrt-vel.o",
+        "wrt-xyz-m.o",
+        "chk-nucleation.o"
+      ],
+      "species": "multi",
+      "thermostat": "scalev-m",
+      "boundary": "pbc (for-w-dummy)",
+      "integrator": "int-verlet-mav",
+      "force": "for-a-lj-n-pbc-m",
+      "neighbor": "neighbor-pbc-mav-silent",
+      "init": "init-cube1",
+      "stoddard": "stoddard-pbc-n-m",
+      "stopdead": "stopdead-m",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi",
+        "wrt-rst-multi",
+        "wrt-vel",
+        "wrt-xyz-m"
+      ],
+      "notes": "wrt-rst-multi writes a uniquely-named restart file per checkpoint instead of overwriting one file; wrt-xyz-m (not VMD)."
+    },
+    "test": {
+      "kind": "md-binary",
+      "output": "clutest",
+      "objs": [
+        "main.o",
+        "init-cube1.o",
+        "kps.o",
+        "scalev-m.o",
+        "stoddard-pbc-n-m.o",
+        "neighbor-pbc-mav.o",
+        "resize.o",
+        "stopdead-m.o",
+        "rates.o",
+        "chg-natom.o",
+        "for-a-lj-n-pbc-m.o",
+        "for-w-dummy.o",
+        "int-verlet-mav.o",
+        "read-3d.o",
+        "read-rst.o",
+        "wrt-acc.o",
+        "wrt-ave.o",
+        "wrt-csi.o",
+        "wrt-rst.o",
+        "wrt-vel-m-ats1.o",
+        "wrt-xyz-m-ats1.o",
+        "chk-nucleation.o"
+      ],
+      "species": "multi",
+      "thermostat": "scalev-m",
+      "boundary": "pbc (for-w-dummy)",
+      "integrator": "int-verlet-mav",
+      "force": "for-a-lj-n-pbc-m",
+      "neighbor": "neighbor-pbc-mav (verbose, not silent)",
+      "init": "init-cube1",
+      "stoddard": "stoddard-pbc-n-m",
+      "stopdead": "stopdead-m",
+      "writers": [
+        "wrt-acc",
+        "wrt-ave",
+        "wrt-csi",
+        "wrt-rst",
+        "wrt-vel-m-ats1",
+        "wrt-xyz-m-ats1"
+      ],
+      "notes": "wrt-vel-m-ats1/wrt-xyz-m-ats1 write only species-1 atoms; used for single-species diagnostics of multi-species runs."
+    },
+    "benchmark": {
+      "kind": "meta",
+      "output": null,
+      "objs": [],
+      "notes": "Not a binary target itself: runs 'make apple-silent && make silent' sequentially (relies on the flag-set-stamp rules to force a clean rebuild between the two, since apple-silent/silent share .o filenames but use incompatible flag sets). Produces both clu-silent-omp and clu-silent for side-by-side comparison."
+    }
+  },
+  "helper_targets": {
+    "thinyout": {
+      "output": "$(BINDIR)/thinout",
+      "objs": [
+        "thinout.o",
+        "wrt-xyz.o",
+        "read-3d.o",
+        "read-xyz.o"
+      ],
+      "purpose": "Downsample an XYZ trajectory by a skip factor."
+    },
+    "selats": {
+      "output": "$(BINDIR)/selats",
+      "objs": [
+        "selats.o",
+        "wrt-xyz-m1.o",
+        "read-3d.o",
+        "read-xyz-m.o"
+      ],
+      "purpose": "Select/color atoms by species for visualization."
+    },
+    "selclu": {
+      "output": "$(BINDIR)/selclu",
+      "objs": [
+        "selclu.o",
+        "stoddard.o",
+        "wrt-xyz1.o",
+        "read-3d.o",
+        "read-xyz.o"
+      ],
+      "purpose": "Color-code atoms by cluster membership, box (non-PBC) variant."
+    },
+    "selclup": {
+      "output": "$(BINDIR)/selclu",
+      "objs": [
+        "selclu.o",
+        "stoddard-pbc.o",
+        "wrt-xyz3.o",
+        "read-3d.o",
+        "read-xyz.o"
+      ],
+      "purpose": "Color-code atoms by cluster membership, PBC variant. Shares output name with selclu."
+    },
+    "sizer": {
+      "output": "$(BINDIR)/sizer",
+      "objs": [
+        "sizer.o",
+        "read-3d.o"
+      ],
+      "purpose": "Analyze a .csi file: largest-cluster size/temperature time series."
+    },
+    "mesher": {
+      "output": "$(BINDIR)/mesher",
+      "objs": [
+        "mesher.o",
+        "read-3d.o"
+      ],
+      "purpose": "Cluster-size-vs-time mesh plot data from .csi file (beta)."
+    },
+    "veltest": {
+      "output": "$(BINDIR)/veltest",
+      "objs": [
+        "veltest.o",
+        "read-3d.o"
+      ],
+      "purpose": "Velocity distribution statistics from .vel file."
+    },
+    "pressw": {
+      "output": "$(BINDIR)/pressw",
+      "objs": [
+        "pressw.o",
+        "read-3d.o",
+        "for-w-i9.o",
+        "wrt-ave.o",
+        "read-xyz.o"
+      ],
+      "purpose": "Pressure from wall forces; non-PBC only; README marks it OBSOLETE."
+    },
+    "marker": {
+      "output": "$(BINDIR)/marker",
+      "objs": [
+        "marker.o",
+        "wrt-xyz-m.o",
+        "read-3d.o",
+        "read-xyz.o"
+      ],
+      "purpose": "Mark specific atoms with alternate symbols."
+    },
+    "press": {
+      "output": "$(BINDIR)/press",
+      "objs": [
+        "press.o",
+        "read-3d.o"
+      ],
+      "purpose": "Average pressure from .ave file over an interval."
+    },
+    "density": {
+      "output": "$(BINDIR)/density",
+      "objs": [
+        "density.o",
+        "stoddard.o",
+        "read-3d.o",
+        "read-xyz.o"
+      ],
+      "purpose": "Density profile of the largest cluster, box (non-PBC) variant."
+    },
+    "densityp": {
+      "output": "$(BINDIR)/density",
+      "objs": [
+        "densitp.o",
+        "stoddard-pbc.o",
+        "read-3d.o",
+        "read-xyz.o"
+      ],
+      "purpose": "Density profile, PBC variant. Shares output name with density."
+    },
+    "sysdens": {
+      "output": "$(BINDIR)/sysdens",
+      "objs": [
+        "sysdens.o",
+        "read-3d.o",
+        "read-xyz.o"
+      ],
+      "purpose": "System density on a spatial grid."
+    },
+    "colgas": {
+      "output": "$(BINDIR)/colgas",
+      "objs": [
+        "colgas.o",
+        "stoddard.o",
+        "wrt-xyz-m.o",
+        "read-3d.o",
+        "read-xyz.o"
+      ],
+      "purpose": "Track carrier-gas exchange between cluster and vapor, box variant."
+    },
+    "colgasp": {
+      "output": "$(BINDIR)/colgas",
+      "objs": [
+        "colgas.o",
+        "stoddard-pbc.o",
+        "wrt-xyz-m.o",
+        "read-3d.o",
+        "read-xyz.o"
+      ],
+      "purpose": "Same, PBC variant. Shares output name with colgas."
+    },
+    "rdf": {
+      "output": "$(BINDIR)/rdf",
+      "objs": [
+        "rdf.o",
+        "read-3d.o",
+        "read-xyz.o"
+      ],
+      "purpose": "Radial distribution function and structure factor. PBC only (per README)."
+    },
+    "timefile": {
+      "output": "$(BINDIR)/timefile",
+      "objs": [
+        "timefile.o",
+        "read-3d.o"
+      ],
+      "purpose": "Generate a SciAn time file (ps) from a .3d file."
+    },
+    "makelog": {
+      "output": "$(BINDIR)/makelog",
+      "objs": [
+        "makelog.o",
+        "read-3d.o"
+      ],
+      "purpose": "Generate log files (README leaves this undocumented)."
+    },
+    "bars": {
+      "output": "$(BINDIR)/bars",
+      "objs": [
+        "bars.o",
+        "read-3d.o"
+      ],
+      "purpose": "Time-dependent cluster-size-distribution bar chart (.nff) from a .csi file."
+    },
+    "reverse": {
+      "output": "$(BINDIR)/reverse",
+      "objs": [
+        "reverse.o",
+        "read-3d.o",
+        "read-xyz.o",
+        "wrt-xyz.o"
+      ],
+      "purpose": "Reverse time ordering of an XYZ file (README leaves this undocumented)."
+    },
+    "rate-xyz": {
+      "output": "$(BINDIR)/rate-xyz",
+      "objs": [
+        "rate-xyz.o",
+        "read-3d.o",
+        "read-xyz.o",
+        "stoddard-pbc.o",
+        "rates.o"
+      ],
+      "purpose": "Compute condensation/evaporation rates from an XYZ trajectory."
+    },
+    "stotest": {
+      "output": "$(BINDIR)/stotest",
+      "objs": [
+        "stotest.o",
+        "read-3d.o",
+        "read-xyz.o",
+        "stoddard-pbc-n.o",
+        "wrt-csi.o",
+        "neighbor-pbc.o"
+      ],
+      "purpose": "Standalone test harness for the Stoddard cluster routine on XYZ data."
+    },
+    "ratstat": {
+      "output": "$(BINDIR)/ratstat",
+      "objs": [
+        "ratstat.o"
+      ],
+      "purpose": "Statistical analysis of rate data."
+    },
+    "ratstatt": {
+      "output": "$(BINDIR)/ratstat-t",
+      "objs": [
+        "ratstat-t.o"
+      ],
+      "purpose": "Time-resolved rate statistics."
+    },
+    "bigcl": {
+      "output": "$(BINDIR)/bigcl",
+      "objs": [
+        "bigcl.o",
+        "stoddard.o",
+        "wrt-xyz-m.o",
+        "read-3d.o",
+        "read-xyz.o"
+      ],
+      "purpose": "Extract and output only the largest cluster, box variant."
+    },
+    "bigclp": {
+      "output": "$(BINDIR)/bigcl",
+      "objs": [
+        "bigcl.o",
+        "stoddard-pbc.o",
+        "wrt-xyz-m.o",
+        "read-3d.o",
+        "read-xyz.o"
+      ],
+      "purpose": "Same, PBC variant. Shares output name with bigcl."
+    },
+    "focusclp": {
+      "output": "$(BINDIR)/focusclp",
+      "objs": [
+        "focusclp.o",
+        "stoddard-pbc.o",
+        "read-3d.o",
+        "read-xyz.o",
+        "wrt-xyz.o"
+      ],
+      "purpose": "Focus view on a cluster with PBC unwrapping."
+    },
+    "passagetime": {
+      "output": "$(BINDIR)/passage-time",
+      "objs": [
+        "passage-time.o"
+      ],
+      "purpose": "Mean first-passage time analysis."
+    },
+    "mpt": {
+      "output": "$(BINDIR)/mpt",
+      "objs": [
+        "mpt.o"
+      ],
+      "purpose": "MPT helper utility (undocumented in README)."
+    },
+    "tempavg": {
+      "output": "$(BINDIR)/tempavg",
+      "objs": [
+        "tempavg.o"
+      ],
+      "purpose": "Cluster temperature averaging."
+    },
+    "meantemp": {
+      "output": "$(BINDIR)/meantemp",
+      "objs": [
+        "meantemp.o"
+      ],
+      "purpose": "Mean temperature computation."
+    },
+    "t-hist": {
+      "output": "$(BINDIR)/t-hist",
+      "objs": [
+        "t-hist.o"
+      ],
+      "purpose": "Temperature histograms."
+    },
+    "tempavg2": {
+      "output": "$(BINDIR)/tempavg2",
+      "objs": [
+        "tempavg2.o"
+      ],
+      "purpose": "Alternate cluster temperature averaging (variant of tempavg)."
+    },
+    "diffusivity": {
+      "output": "$(BINDIR)/diffusivity",
+      "objs": [
+        "diffusivity.o"
+      ],
+      "purpose": "Barrier diffusivity from sizer output."
+    },
+    "probability": {
+      "output": "$(BINDIR)/probability-distrib",
+      "objs": [
+        "probability-distrib.o"
+      ],
+      "purpose": "Cluster-size probability distributions."
+    }
+  },
+  "housekeeping_targets": {
+    "clean": "Remove all .o files, all MD binaries, and the flag-set stamps.",
+    "archive": "Tar+gzip the source tree (*.f, *.inc, Makefile, sample.3d, README, helpers/*) into archive.tar.gz.",
+    "bdir": "Prerequisite of every helper target: creates $(BINDIR) (default $(HOME)/bin) if missing."
+  },
+  "module_traits": {
+    "thermostat": {
+      "scalev": "Single-species isokinetic velocity scaling (scalev.f, subroutine thermostat).",
+      "scalev-m": "Multi-species isokinetic velocity scaling, gated per species by the apth(i) flag from the .3d file (scalev-m.f). Primary production thermostat.",
+      "scalev-nh-m": "Nose-Hoover coupling combined with velocity scaling at init (scalev-nh-m.f); paired only with int-verlet-nh-mav.",
+      "scalev-clu": "Cluster thermostat (scales cluster atoms separately from vapor); source exists (scalev-clu.f) but is not linked into any Makefile target -- dead in every shipped binary."
+    },
+    "boundary": {
+      "walls": "for-w-i9.o (or other for-w-*.f) supplies real repulsive wall forces on box faces; used only by the 'cluster' target.",
+      "pbc": "for-w-dummy.o (no-op walls) is linked; periodicity is instead controlled per-axis by the bperx/bpery/bperz fields in the .3d file and enforced by the paired for-a-*-pbc*.f minimum-image force routine and neighbor-pbc*.f neighbor list. Used by every target except 'cluster'."
+    },
+    "integrator": {
+      "int-verlet-dmm": "Velocity-Verlet with raw cumulative displacement tracking (no moving-average smoothing) to decide when to rebuild the neighbor list.",
+      "int-verlet-mav": "Velocity-Verlet with moving-average displacement tracking and adaptive neighbor-list skin radius. Primary production integrator.",
+      "int-verlet-mav-omp": "Same algorithm as int-verlet-mav, OpenMP-parallelized for Apple Silicon builds.",
+      "int-verlet-nh-mav": "int-verlet-mav plus Nose-Hoover friction terms and iterative velocity/PSI convergence (up to 1000 iterations, tol 1e-10). Only pairs with scalev-nh-m.",
+      "orphaned (no Makefile target)": "int-verlet.f (basic Verlet, no displacement tracking), int-euler1.f, int-euler2.f, int-gear3.f, int-gear4.f, int-gear5.f are present in cluster/ and documented in the README but no current Makefile target builds them."
+    },
+    "force": {
+      "for-a-lj-n": "Single-species LJ 12-6, cutoff radius, neighbor list, no PBC.",
+      "for-a-lj-n-pbc": "Single-species LJ 12-6, cutoff, neighbor list, minimum-image PBC.",
+      "for-a-lj-n-pbc-m": "Multi-species LJ 12-6, cutoff, neighbor list, PBC; handles 1-1/2-2/1-2 (geometric-mixing) interactions. Primary production force routine.",
+      "for-a-lj-n-pbc-m-omp": "Same as for-a-lj-n-pbc-m, OpenMP-parallelized.",
+      "orphaned (no Makefile target)": "for-a-lj1.f..for-a-lj4.f (O(N^2) historical development sequence), for-a-lj-n-pbcsw.f (shifted-potential PBC), for-a-dummy.f (no-op) exist but are not referenced by any current Makefile target."
+    },
+    "neighbor": {
+      "neighbor": "Basic Verlet neighbor list, no PBC.",
+      "neighbor-pbc": "PBC neighbor list, fixed skin, no adaptive rebuild.",
+      "neighbor-pbc-mav": "PBC neighbor list, adaptive skin radius via moving-average displacement tracking; per-step diagnostic printed to stdout.",
+      "neighbor-pbc-mav-silent": "Same source file as neighbor-pbc-mav.f, compiled with 'gfortran -cpp -DSILENT' into a differently-named object (neighbor-pbc-mav-silent.o) that suppresses the per-step diagnostic. Used by every 'production' multi-species target.",
+      "neighbor-pbc-mav-omp": "OpenMP-parallel variant of neighbor-pbc-mav, used by apple-silent/apple-frenkel.",
+      "orphaned (no Makefile target)": "neighbor-dummy.f (no-op, for O(N^2) force routines) and neighbor-pbcsw-mav.f (shifted-potential PBC + moving average) exist but are not referenced by any current Makefile target."
+    },
+    "stoddard": {
+      "stoddard": "Stillinger cluster search, O(N^2), no PBC.",
+      "stoddard-pbc": "Stillinger cluster search, O(N^2), PBC (used only by helper programs, not by any MD binary target).",
+      "stoddard-pbc-n": "Stillinger cluster search, PBC, neighbor-list-optimized, single-species.",
+      "stoddard-pbc-n-m": "Stillinger cluster search, PBC, neighbor-list-optimized, multi-species.",
+      "stoddard-pbc-n-m-fre": "stoddard-pbc-n-m plus the ten Wolde/Frenkel liquid-monomer cluster criterion. Most complete cluster finder used by an MD binary target.",
+      "stoddard-pbc-n-m-fre-mov": "stoddard-pbc-n-m-fre plus cluster-movement tracking for visualization.",
+      "orphaned (no Makefile target)": "stoddard-pbcsw-n.f (shifted-potential variant) and stoddard-dummy.f (no-op) exist but are not referenced by any current Makefile target."
+    },
+    "writers": {
+      "wrt-csi vs wrt-csi-fre": "wrt-csi writes only the Stillinger cluster-size distribution (.csi); wrt-csi-fre additionally writes the ten Wolde/Frenkel distribution (.fsi).",
+      "wrt-rst vs wrt-rst-multi": "wrt-rst overwrites one restart file each interval; wrt-rst-multi writes a uniquely-numbered file per checkpoint.",
+      "wrt-xyz family": "wrt-xyz (single species, basic), wrt-xyz-m (multi-species), wrt-xyz-m-vmd (multi-species, VMD-compatible, also drives cluster-visualization side files -- used by every 'production' target), wrt-xyz-m-ats1/wrt-vel-m-ats1 (species-1-only output, used by the 'test' target), wrt-xyz1/2/3 and wrt-xyz-m1 (color-coded/largest-cluster/threshold variants used only by helper programs, not by any MD binary target)."
+    }
+  },
+  "input_3d_fields": [
+    {
+      "field": "fver",
+      "meaning": "Input-file format version number. Must be >= 1.02 (hardcoded 'ver' local) or readdata() stops with an error.",
+      "format": "41X,F8.6",
+      "columns": "42-49",
+      "sample_3d_line": 2,
+      "version_gate": null,
+      "source": "read-3d.f:58"
+    },
+    {
+      "field": "fpath",
+      "meaning": "Relative directory path prepended to every other output filename below.",
+      "format": "41X,A",
+      "columns": "42-121",
+      "sample_3d_line": 4,
+      "version_gate": null,
+      "source": "read-3d.f:66"
+    },
+    {
+      "field": "fxyz",
+      "meaning": "Filename for the atom-position trajectory (.xyz).",
+      "format": "41X,A",
+      "columns": "42-121",
+      "sample_3d_line": 5,
+      "version_gate": null,
+      "source": "read-3d.f:68"
+    },
+    {
+      "field": "ftxyz",
+      "meaning": "Output interval (steps) for the .xyz file; 0 = disabled.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 6,
+      "version_gate": null,
+      "source": "read-3d.f:71"
+    },
+    {
+      "field": "fvel",
+      "meaning": "Filename for the velocity trajectory (.vel).",
+      "format": "41X,A",
+      "columns": "42-121",
+      "sample_3d_line": 7,
+      "version_gate": null,
+      "source": "read-3d.f:73"
+    },
+    {
+      "field": "ftvel",
+      "meaning": "Output interval (steps) for the .vel file; 0 = disabled.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 8,
+      "version_gate": null,
+      "source": "read-3d.f:76"
+    },
+    {
+      "field": "facc",
+      "meaning": "Filename for the acceleration trajectory (.acc).",
+      "format": "41X,A",
+      "columns": "42-121",
+      "sample_3d_line": 9,
+      "version_gate": null,
+      "source": "read-3d.f:77"
+    },
+    {
+      "field": "ftacc",
+      "meaning": "Output interval (steps) for the .acc file; 0 = disabled.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 10,
+      "version_gate": null,
+      "source": "read-3d.f:80"
+    },
+    {
+      "field": "frst",
+      "meaning": "Filename for the restart file (.rst).",
+      "format": "41X,A",
+      "columns": "42-121",
+      "sample_3d_line": 11,
+      "version_gate": null,
+      "source": "read-3d.f:81"
+    },
+    {
+      "field": "ftrst",
+      "meaning": "Output interval (steps) for the restart file; 0 = disabled.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 12,
+      "version_gate": null,
+      "source": "read-3d.f:84"
+    },
+    {
+      "field": "fcsi",
+      "meaning": "Filename for the cluster-size-distribution file (.csi).",
+      "format": "41X,A",
+      "columns": "42-121",
+      "sample_3d_line": 13,
+      "version_gate": null,
+      "source": "read-3d.f:85"
+    },
+    {
+      "field": "ftcsi",
+      "meaning": "Output interval (steps) for the .csi file; 0 = disabled.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 14,
+      "version_gate": null,
+      "source": "read-3d.f:95"
+    },
+    {
+      "field": "fave",
+      "meaning": "Filename for the running-averages file (.ave).",
+      "format": "41X,A",
+      "columns": "42-121",
+      "sample_3d_line": 15,
+      "version_gate": null,
+      "source": "read-3d.f:96"
+    },
+    {
+      "field": "ftave",
+      "meaning": "Output interval (steps) for the .ave file; 0 = disabled.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 16,
+      "version_gate": null,
+      "source": "read-3d.f:99"
+    },
+    {
+      "field": "frat",
+      "meaning": "Filename for the condensation/evaporation rate file (.rat).",
+      "format": "41X,A",
+      "columns": "42-121",
+      "sample_3d_line": 17,
+      "version_gate": "fver>=1.06",
+      "source": "read-3d.f:101"
+    },
+    {
+      "field": "ftrat",
+      "meaning": "Output interval for rate events; 0 = none, 1 = log all events.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 18,
+      "version_gate": "fver>=1.06",
+      "source": "read-3d.f:104"
+    },
+    {
+      "field": "dt",
+      "meaning": "Timestep length in femtoseconds.",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 20,
+      "version_gate": null,
+      "source": "read-3d.f:113"
+    },
+    {
+      "field": "ntim",
+      "meaning": "Total number of timesteps to run.",
+      "format": "40X,I10",
+      "columns": "41-50",
+      "sample_3d_line": 21,
+      "version_gate": null,
+      "source": "read-3d.f:114"
+    },
+    {
+      "field": "btim",
+      "meaning": "Starting timestep number (nonzero when resuming/renumbering).",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 22,
+      "version_gate": null,
+      "source": "read-3d.f:115"
+    },
+    {
+      "field": "sctim",
+      "meaning": "Interval (steps) between screen-progress printouts.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 23,
+      "version_gate": null,
+      "source": "read-3d.f:116"
+    },
+    {
+      "field": "boxx",
+      "meaning": "Box size in X, nanometres in the file; converted to Angstrom (*10) after reading.",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 25,
+      "version_gate": null,
+      "source": "read-3d.f:118"
+    },
+    {
+      "field": "boxy",
+      "meaning": "Box size in Y (nm -> internally *10 -> Angstrom).",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 26,
+      "version_gate": null,
+      "source": "read-3d.f:119"
+    },
+    {
+      "field": "boxz",
+      "meaning": "Box size in Z (nm -> internally *10 -> Angstrom).",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 27,
+      "version_gate": null,
+      "source": "read-3d.f:120"
+    },
+    {
+      "field": "bperx",
+      "meaning": "Periodic boundary in X: 'X' = yes, '-' = no.",
+      "format": "41X,A",
+      "columns": "42",
+      "sample_3d_line": 28,
+      "version_gate": "fver>=1.08",
+      "source": "read-3d.f:122",
+      "valid_range": "X | -"
+    },
+    {
+      "field": "bpery",
+      "meaning": "Periodic boundary in Y.",
+      "format": "41X,A",
+      "columns": "42",
+      "sample_3d_line": 29,
+      "version_gate": "fver>=1.08",
+      "source": "read-3d.f:123",
+      "valid_range": "X | -"
+    },
+    {
+      "field": "bperz",
+      "meaning": "Periodic boundary in Z.",
+      "format": "41X,A",
+      "columns": "42",
+      "sample_3d_line": 30,
+      "version_gate": "fver>=1.08",
+      "source": "read-3d.f:124",
+      "valid_range": "X | -"
+    },
+    {
+      "field": "bpot",
+      "meaning": "Wall potential exponent (used by for-w-iX.f; not read by every for-w-*.f variant).",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 31,
+      "version_gate": null,
+      "source": "read-3d.f:130"
+    },
+    {
+      "field": "beng",
+      "meaning": "Wall potential energy parameter in Kelvin; converted to internal units (*cikb) after reading.",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 32,
+      "version_gate": null,
+      "source": "read-3d.f:131"
+    },
+    {
+      "field": "bcor",
+      "meaning": "Show box corners in XYZ output: 'X' = yes, '-' = no.",
+      "format": "41X,A",
+      "columns": "42",
+      "sample_3d_line": 33,
+      "version_gate": null,
+      "source": "read-3d.f:132",
+      "valid_range": "X | -"
+    },
+    {
+      "field": "bshr",
+      "meaning": "Box resize active: 'X' = yes, '-' = no.",
+      "format": "41X,A",
+      "columns": "42",
+      "sample_3d_line": 34,
+      "version_gate": "fver>=1.05",
+      "source": "read-3d.f:134",
+      "valid_range": "X | -"
+    },
+    {
+      "field": "boxxn",
+      "meaning": "Target box size in X after resize (nm -> Angstrom).",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 35,
+      "version_gate": "fver>=1.05",
+      "source": "read-3d.f:135"
+    },
+    {
+      "field": "boxyn",
+      "meaning": "Target box size in Y after resize.",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 36,
+      "version_gate": "fver>=1.05",
+      "source": "read-3d.f:136"
+    },
+    {
+      "field": "boxzn",
+      "meaning": "Target box size in Z after resize.",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 37,
+      "version_gate": "fver>=1.05",
+      "source": "read-3d.f:137"
+    },
+    {
+      "field": "boxxs",
+      "meaning": "Max resize step per interval in X (nm -> Angstrom, abs() applied).",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 38,
+      "version_gate": "fver>=1.05",
+      "source": "read-3d.f:138"
+    },
+    {
+      "field": "boxys",
+      "meaning": "Max resize step per interval in Y.",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 39,
+      "version_gate": "fver>=1.05",
+      "source": "read-3d.f:139"
+    },
+    {
+      "field": "boxzs",
+      "meaning": "Max resize step per interval in Z.",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 40,
+      "version_gate": "fver>=1.05",
+      "source": "read-3d.f:140"
+    },
+    {
+      "field": "boxt",
+      "meaning": "Number of timesteps between box resizes.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 41,
+      "version_gate": "fver>=1.05",
+      "source": "read-3d.f:141"
+    },
+    {
+      "field": "atsorts",
+      "meaning": "Number of atom species; read here only for fver<1.10 (pre-multi-species format). Superseded by the modern atsorts field near line 63 of the .3d file for fver>=1.10.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": null,
+      "version_gate": "fver<1.10",
+      "source": "read-3d.f:163"
+    },
+    {
+      "field": "frctrl",
+      "meaning": "Use a restart file to initialize positions/velocities: 'X' = yes, '-' = no.",
+      "format": "41X,A",
+      "columns": "42",
+      "sample_3d_line": 43,
+      "version_gate": null,
+      "source": "read-3d.f:164",
+      "valid_range": "X | -"
+    },
+    {
+      "field": "finp",
+      "meaning": "Filename of the input restart file (read when frctrl='X').",
+      "format": "41X,A",
+      "columns": "42-121",
+      "sample_3d_line": 44,
+      "version_gate": null,
+      "source": "read-3d.f:165"
+    },
+    {
+      "field": "ethst",
+      "meaning": "Thermostat type flag: 'X' (velocity scaling), 'N' (Nose-Hoover), '-' (none).",
+      "format": "41X,A",
+      "columns": "42",
+      "sample_3d_line": 45,
+      "version_gate": null,
+      "source": "read-3d.f:168",
+      "valid_range": "X | N | -"
+    },
+    {
+      "field": "Q",
+      "meaning": "Nose-Hoover coupling constant; later rescaled by apmas(1)*apsig(1)^2.",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 46,
+      "version_gate": "fver>=1.2",
+      "source": "read-3d.f:171"
+    },
+    {
+      "field": "rndctrl",
+      "meaning": "Give atoms purely random velocities after init: 'X' = yes, '-' = no.",
+      "format": "41X,A",
+      "columns": "42",
+      "sample_3d_line": 47,
+      "version_gate": null,
+      "source": "read-3d.f:174",
+      "valid_range": "X | -"
+    },
+    {
+      "field": "eclth",
+      "meaning": "Cluster thermostat enabled: 'X' = yes, '-' = no.",
+      "format": "41X,A",
+      "columns": "42",
+      "sample_3d_line": 48,
+      "version_gate": "fver>=1.07",
+      "source": "read-3d.f:176",
+      "valid_range": "X | -",
+      "unused": true,
+      "unused_reason": "Only consumer is scalev-clu.f (subroutine thermostat, cluster-specific scaling), and scalev-clu.o is never linked into any Makefile target -- the field is parsed but has no effect in any shipped binary."
+    },
+    {
+      "field": "ecltim",
+      "meaning": "Cluster thermostat timer (steps).",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 49,
+      "version_gate": "fver>=1.07",
+      "source": "read-3d.f:177",
+      "unused": true,
+      "unused_reason": "Same dead-code path as eclth: only read by scalev-clu.f, which is not linked into any Makefile target."
+    },
+    {
+      "field": "att",
+      "meaning": "Target system temperature in Kelvin.",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 51,
+      "version_gate": "fver>=1.10",
+      "source": "read-3d.f:184"
+    },
+    {
+      "field": "atskin",
+      "meaning": "Stillinger cluster-distance criterion, in units of sigma (species-1 sigma); scaled to Angstrom (*atr) after the per-species block is read.",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 52,
+      "version_gate": "fver>=1.10",
+      "source": "read-3d.f:185"
+    },
+    {
+      "field": "atnenum",
+      "meaning": "Minimum neighbor count (species 1) for the ten Wolde/Frenkel 'liquid monomer' criterion.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 53,
+      "version_gate": "fver>=1.30",
+      "source": "read-3d.f:187"
+    },
+    {
+      "field": "atrcut",
+      "meaning": "LJ potential cutoff radius, in units of sigma; scaled to Angstrom after the species block.",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 54,
+      "version_gate": "fver>=1.10",
+      "source": "read-3d.f:189"
+    },
+    {
+      "field": "atrskin",
+      "meaning": "Neighbor-list skin radius, in units of sigma; scaled to Angstrom after the species block.",
+      "format": "41X,F14.5",
+      "columns": "42-55",
+      "sample_3d_line": 55,
+      "version_gate": "fver>=1.10",
+      "source": "read-3d.f:190"
+    },
+    {
+      "field": "nbtim",
+      "meaning": "Neighbor-list update interval (steps) for the fixed-interval neighbor variants; also seeds the adaptive-skin moving-average window size for the *-mav variants.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 56,
+      "version_gate": "fver>=1.10",
+      "source": "read-3d.f:191"
+    },
+    {
+      "field": "chgNtim",
+      "meaning": "Interval (steps) between atom-count-change checks (chgNatom).",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 57,
+      "version_gate": "fver>=1.11",
+      "source": "read-3d.f:194"
+    },
+    {
+      "field": "clnuctrl",
+      "meaning": "Enable nucleation auto-abort check: 'X' = yes, '-' = no.",
+      "format": "41X,A",
+      "columns": "42",
+      "sample_3d_line": 59,
+      "version_gate": "fver>=1.12",
+      "source": "read-3d.f:200",
+      "valid_range": "X | -"
+    },
+    {
+      "field": "csover",
+      "meaning": "Minimum cluster size that triggers the nucleation-abort timer.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 60,
+      "version_gate": "fver>=1.12",
+      "source": "read-3d.f:201"
+    },
+    {
+      "field": "clwait",
+      "meaning": "Number of consecutive timesteps the oversized cluster must persist before the run is aborted.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 61,
+      "version_gate": "fver>=1.12",
+      "source": "read-3d.f:202"
+    },
+    {
+      "field": "atsorts",
+      "meaning": "Number of atom species (fver>=1.10 position); drives the per-species read loop below.",
+      "format": "41X,I10",
+      "columns": "42-51",
+      "sample_3d_line": 63,
+      "version_gate": "fver>=1.10",
+      "source": "read-3d.f:205",
+      "valid_range": "1..mxsorts(10)"
+    }
+  ],
+  "input_3d_per_species_fields": {
+    "fields": [
+      {
+        "field": "apsym(i)",
+        "meaning": "Atom symbol for species i.",
+        "format": "41X,A",
+        "source": "read-3d.f:230",
+        "sample_3d_line_species1": 65
+      },
+      {
+        "field": "apnum(i)",
+        "meaning": "Number of atoms of species i.",
+        "format": "41X,I10",
+        "source": "read-3d.f:231",
+        "sample_3d_line_species1": 66
+      },
+      {
+        "field": "apmas(i)",
+        "meaning": "Mass of species i, in u; converted to internal units (*cimu).",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:232",
+        "sample_3d_line_species1": 67
+      },
+      {
+        "field": "apsig(i)",
+        "meaning": "LJ sigma of species i, in nm; converted to Angstrom (*10).",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:233",
+        "sample_3d_line_species1": 68
+      },
+      {
+        "field": "apeps(i)",
+        "meaning": "LJ epsilon of species i, in K; converted to internal units (*cikb).",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:234",
+        "sample_3d_line_species1": 69
+      },
+      {
+        "field": "appr(i)",
+        "meaning": "Repulsive LJ exponent of species i.",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:235",
+        "sample_3d_line_species1": 70
+      },
+      {
+        "field": "appa(i)",
+        "meaning": "Attractive LJ exponent of species i.",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:236",
+        "sample_3d_line_species1": 71
+      },
+      {
+        "field": "apth(i)",
+        "meaning": "Thermostat flag for species i ('X' = thermostated by scalev-m, '-' = not).",
+        "format": "41X,A",
+        "source": "read-3d.f:237",
+        "sample_3d_line_species1": 72,
+        "valid_range": "X | -"
+      },
+      {
+        "field": "apNch(i)",
+        "meaning": "Enable atom-count change for species i: 'X' = yes, '-' = no.",
+        "format": "41X,A",
+        "source": "read-3d.f:239",
+        "version_gate": "fver>=1.11",
+        "sample_3d_line_species1": 73,
+        "valid_range": "X | -"
+      },
+      {
+        "field": "apnnum(i)",
+        "meaning": "New atom count for species i when chgNatom is triggered.",
+        "format": "41X,I10",
+        "source": "read-3d.f:240",
+        "version_gate": "fver>=1.11",
+        "sample_3d_line_species1": 74
+      }
+    ],
+    "note": "Repeats once per species, atsorts times (do i=1,atsorts loop at read-3d.f:229-254), each iteration followed by one blank divider line (read-3d.f:245, 'read (1,\\'(A)\\') dummy'). sample.3d has 2 species: species 1 on lines 65-75, species 2 on lines 76-85 (same field order)."
+  },
+  "input_3d_legacy_pre_1_10_fields": {
+    "fields": [
+      {
+        "field": "ats",
+        "meaning": "Atom symbol (equivalenced to apsym(1)).",
+        "format": "41X,A",
+        "source": "read-3d.f:210"
+      },
+      {
+        "field": "natom",
+        "meaning": "Number of atoms.",
+        "format": "41X,I10",
+        "source": "read-3d.f:211"
+      },
+      {
+        "field": "atm",
+        "meaning": "Atom mass in u; converted to internal units (*cimu).",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:212"
+      },
+      {
+        "field": "atr",
+        "meaning": "LJ sigma in nm; converted to Angstrom (*10).",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:213"
+      },
+      {
+        "field": "ate",
+        "meaning": "LJ epsilon in K; converted to internal units (*cikb).",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:214"
+      },
+      {
+        "field": "atpr",
+        "meaning": "Repulsive LJ exponent (equivalenced to appr(1)).",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:215"
+      },
+      {
+        "field": "atpa",
+        "meaning": "Attractive LJ exponent (equivalenced to appa(1)).",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:216"
+      },
+      {
+        "field": "att",
+        "meaning": "Target system temperature in K.",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:217"
+      },
+      {
+        "field": "atskin",
+        "meaning": "Stillinger cluster-distance criterion, in units of sigma.",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:218"
+      },
+      {
+        "field": "atrcut",
+        "meaning": "LJ potential cutoff radius, in units of sigma.",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:219"
+      },
+      {
+        "field": "atrskin",
+        "meaning": "Neighbor-list skin radius, in units of sigma.",
+        "format": "41X,F14.5",
+        "source": "read-3d.f:220"
+      },
+      {
+        "field": "nbtim",
+        "meaning": "Neighbor-list update interval (steps).",
+        "format": "41X,I10",
+        "source": "read-3d.f:221"
+      }
+    ],
+    "note": "This whole block (read-3d.f:208-225) only executes when fver<1.10 -- the old single-species .3d format that predates per-species blocks. It has no corresponding lines in the shipped sample.3d (fver=1.30) and is exercised only by legacy input files that were never migrated."
+  }
+}
