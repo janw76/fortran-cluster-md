@@ -11,5 +11,26 @@
         "matcher": ""
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git push:*)",
+      "Bash(git merge:*)",
+      "Bash(git worktree:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh run watch:*)",
+      "Bash(bd:*)",
+      "Bash(redmine:*)",
+      "Bash(bin/deploy:*)",
+      "Bash(./bin/deploy:*)"
+    ],
+    "ask": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(git reset --hard:*)"
+    ]
   }
 }
